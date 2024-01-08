@@ -992,7 +992,7 @@ namespace ProjectApparatus
                     foreach (ShipAlarmCord shipAlarmCord in shipAlarmCords)
                     {
                         //Debug.Log("ShipAlarmCord found: " + shipAlarmCord.ToString());
-                        //shipAlarmCord.StopPullingCordServerRpc(-1);
+                        shipAlarmCord.StopPullingCordServerRpc(-1);
                         //Debug.Log("ShipAlarmCord found: unpulling PLEASE WORK");
                     }
                 }
