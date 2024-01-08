@@ -78,6 +78,8 @@ namespace ProjectApparatus
         public bool b_AntiKick;
         public bool b_Horn;
         public bool b_Turret;
+        public bool b_BetaBadge;
+        public bool b_Invisiblity;
 
         /* Settings*/
         public bool b_DisplayGroupCredits = true;

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using GameNetcodeStuff;
 using Dissonance;
 using Dissonance.Integrations.Unity_NFGO;
-using Hax;
+//using Hax;
 using HarmonyLib;
 using Steamworks;
 using TMPro;
@@ -55,30 +55,7 @@ namespace ProjectApparatus
             return true;
         }
 
-        [HarmonyPatch(typeof(PlayerControllerB), "SendNewPlayerValuesServerRpc")]
-        class AntiKickPatch
-        {
-            private readonly SettingsData settingsData = Settings.Instance.settingsData;
-            static bool Prefix(PlayerControllerB __instance)
-            {
 
-                //if (!settingsData.b_AntiKick) return true;
-                if (!Settings.Instance.settingsData.b_AntiKick) return true;
-
-                ulong[] playerSteamIds = new ulong[__instance.playersManager.allPlayerScripts.Length];
-
-                for (int i = 0; i < __instance.playersManager.allPlayerScripts.Length; i++)
-                {
-                    playerSteamIds[i] = __instance.playersManager.allPlayerScripts[i].playerSteamId;
-                }
-
-                playerSteamIds[__instance.playerClientId] = SteamClient.SteamId;
-
-                _ = __instance.Reflect().InvokeInternalMethod("SendNewPlayerValuesClientRpc", playerSteamIds);
-
-                return false;
-            }
-        }
 
         public static void Postfix(PlayerControllerB __instance)
         {

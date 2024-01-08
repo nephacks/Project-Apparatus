@@ -11,7 +11,7 @@ using System.Windows.Forms;
 using Unity.Netcode;
 using System.IO;
 using UnityEngine.ProBuilder.Shapes;
-using Hax;
+//using Hax;
 using static UnityEngine.GraphicsBuffer;
 
 namespace ProjectApparatus
@@ -196,8 +196,10 @@ namespace ProjectApparatus
             UI.TabContents("Debug", UI.Tabs.Debug, () =>
             {
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
-                UI.Checkbox(ref settingsData.b_Horn, "hupen laut", "spawnt schiff hupe und hupen.");
-                UI.Checkbox(ref settingsData.b_Turret, "alle turrets sauer machen", ".");
+                UI.Checkbox(ref settingsData.b_Horn, "Ship Horn", ".");
+                UI.Checkbox(ref settingsData.b_Turret, "Berserk Turrets", ".");
+                UI.Checkbox(ref settingsData.b_BetaBadge, "Beta Badge", ".");
+                UI.Checkbox(ref settingsData.b_Invisibility, "Invisibility", "Players will not be able to see you.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
@@ -208,7 +210,7 @@ namespace ProjectApparatus
                 Dictionary<PlaceableShipObject, Vector3> originalRotations = new Dictionary<PlaceableShipObject, Vector3>();
 
                 // Inversion button logic
-                UI.Button("alles im schiff auf kopf stellen", "stellt alles auf kopf", () =>
+                UI.Button("upside down ship items", "stellt alles auf kopf", () =>
                 {
                     foreach (PlaceableShipObject shipObject in GameObjectManager.Instance.shipObjects)
                     {
@@ -231,7 +233,7 @@ namespace ProjectApparatus
                     }
                 });
 
-                UI.Button("upgrades weg", "macht alle upgrades einfach weg", () =>
+                UI.Button("hide all upgrades", "macht alle upgrades einfach weg", () =>
                 {
                     foreach (PlaceableShipObject shipObject in GameObjectManager.Instance.shipObjects)
                     {
@@ -274,7 +276,7 @@ namespace ProjectApparatus
                 });
 
 
-                UI.Button("garage bei experimentation zumachen", "", () =>
+                UI.Button("close garage door experimentation", "", () =>
                 {
                     var interactTriggers = GameObject.FindObjectsOfType<InteractTrigger>();
 
@@ -553,7 +555,7 @@ namespace ProjectApparatus
                     }
 
                     Settings.Instance.str_ChatAsPlayer = GUILayout.TextField(Settings.Instance.str_ChatAsPlayer, Array.Empty<GUILayoutOption>());
-                    UI.Button("Nachricht als spieler senden", "Sends a message in chat as the selected player.", () =>
+                    UI.Button("Send message", "Sends a message in chat as the selected player.", () =>
                     {
                         PAUtils.SendChatMessage(Settings.Instance.str_ChatAsPlayer, (int)selectedPlayer.playerClientId);
                     });
