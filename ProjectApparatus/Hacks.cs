@@ -275,6 +275,16 @@ namespace ProjectApparatus
                     }
                 });
 
+                UI.Button("0 money", ".", () =>
+                {
+                    if (Instance.shipTerminal)
+                    {
+                        Instance.shipTerminal.groupCredits = 0
+                        Instance.shipTerminal.SyncGroupCreditsServerRpc(Instance.shipTerminal.groupCredits,
+                            Instance.shipTerminal.numberOfItemsInDropship);
+                    }
+                    Instance.shipTerminal.groupCredits
+                });
 
                 UI.Button("close garage door experimentation", "", () =>
                 {
