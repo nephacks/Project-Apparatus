@@ -75,26 +75,7 @@ namespace ProjectApparatus
         }
     }
 
-    //[HarmonyPatch(typeof(StartOfRound), "ManuallyEjectPlayersServerRpc")]
-    //public static class ManuallyEjectPlayersServerRpcPatch
-    //{
-    //    static bool Prefix(ref NetworkManager __instance, ref __RpcExecStage __rpc_exec_stage, ref bool inShipPhase, ref bool firingPlayersCutsceneRunning, ref List<NetworkObject> fullyLoadedPlayers)
-    //    {
-    //        // Your code to replicate the necessary parts of the original method, excluding the owner check.
-    //        // For example:
-    //        if ((object)__instance == null || !__instance.IsListening)
-    //        {
-    //            return false;
-    //        }
-    //
-    //        // Continue with the rest of the method's logic, modifying as necessary.
-    //        // ...
-    //
-    //        // Returning false to skip the original implementation
-    //        return false;
-    //    }
-    //}
-    //
+
     [HarmonyPatch(typeof(PlayerControllerB), "LateUpdate")]
     public class PlayerControllerB_LateUpdate_Patch
     {
