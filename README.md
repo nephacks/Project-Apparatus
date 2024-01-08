@@ -1,3 +1,17 @@
+### Fork of Project Apparatus, original can be found [here](https://github.com/KaylinOwO/Project-Apparatus) 
+
+My fork adds some features from other cheats and own ideas.
+These are 
+- **Ship Horn:** Spawns a ship horn (does not use any credits) and keeps pulling the cord, it makes a really annoying sound in the ship while being audible from everywhere in the facility.
+- **Turn all ship objects upside down:** Self-explantory.
+- **Hide all upgrades:** Teleports all upgrades, way way WAY far out of the map. Teleporting someone is also a good funny bit.
+- **Berserk Turrets:** Makes all turrets angry.
+- **Remove all money:** Remove all money. 
+- **Lower experimentation garage door:** Lowers the garage door by a tiny bit, can be clicked multiple times to fully close.
+
+
+# Original README
+
 # Project by waxxyTF2, UrbanaJoker & Toaaa - [UC Thread](https://www.unknowncheats.me/forum/other-fps-games/616587-project-apparatus-lethal-company-cheat.html)
 ## Based on [Infinite Company](https://www.unknowncheats.me/forum/other-fps-games/613770-infinite-company-lethal-company-cheat.html) by UrbanaJoker
 
