@@ -22,13 +22,6 @@ namespace ProjectApparatus
         private static GUIStyle Style = null;
         private readonly SettingsData settingsData = Settings.Instance.settingsData;
 
-        bool IsPlayerValid(PlayerControllerB plyer)
-        {
-            return (plyer != null &&
-                    !plyer.disconnectedMidGame &&
-                    !plyer.playerUsername.Contains("Player #"));
-        }
-
         public void OnGUI()
         {
             if (!Settings.Instance.b_isMenuOpen && Event.current.type != EventType.Repaint)
@@ -66,6 +59,7 @@ namespace ProjectApparatus
             {
                 float iY = Settings.TEXT_HEIGHT;
                 if (settingsData.b_DisplayGroupCredits && Instance.shipTerminal != null) Render.String(Style, centeredPos.x, centeredPos.y + 7 + iY, 150f, Settings.TEXT_HEIGHT, "Group Credits: " + Instance.shipTerminal.groupCredits, GUI.color, true, true); iY += Settings.TEXT_HEIGHT - 10f;
+                if (settingsData.b_DisplayLootInShip && Instance.shipTerminal) Render.String(Style, centeredPos.x, centeredPos.y + 7 + iY, 150f, Settings.TEXT_HEIGHT, "Loot In Ship: " + Instance.shipValue, GUI.color, true, true); iY += Settings.TEXT_HEIGHT - 10f;
                 if (settingsData.b_DisplayQuota && TimeOfDay.Instance) Render.String(Style, centeredPos.x, centeredPos.y + 7 + iY, 150f, Settings.TEXT_HEIGHT, "Profit Quota: " + TimeOfDay.Instance.quotaFulfilled + "/" + TimeOfDay.Instance.profitQuota, GUI.color, true, true); iY += Settings.TEXT_HEIGHT - 10f;
                 if (settingsData.b_DisplayDaysLeft && TimeOfDay.Instance) Render.String(Style, centeredPos.x, centeredPos.y + 7 + iY, 150f, Settings.TEXT_HEIGHT, "Days Left: " + TimeOfDay.Instance.daysUntilDeadline, GUI.color, true, true); iY += Settings.TEXT_HEIGHT - 10f;
             }
@@ -78,6 +72,8 @@ namespace ProjectApparatus
             {
                 if (settingsData.b_DisplayGroupCredits && Instance.shipTerminal != null)
                     Watermark += $" | Group Credits: {Instance.shipTerminal.groupCredits}";
+                if (settingsData.b_DisplayLootInShip && Instance.shipTerminal)
+                    Watermark += $" | Loot In Ship: {Instance.shipValue}";
                 if (settingsData.b_DisplayQuota && TimeOfDay.Instance)
                     Watermark += $" | Profit Quota: {TimeOfDay.Instance.quotaFulfilled} / {TimeOfDay.Instance.profitQuota}";
                 if (settingsData.b_DisplayDaysLeft && TimeOfDay.Instance)
@@ -135,6 +131,7 @@ namespace ProjectApparatus
             UI.TabContents("Self", UI.Tabs.Self, () =>
             {
                 UI.Checkbox(ref settingsData.b_GodMode, "God Mode", "Prevents you from taking any damage.");
+                UI.Checkbox(ref settingsData.b_Invisibility, "Invisibility", "Players will not be able to see you.");
                 UI.Checkbox(ref settingsData.b_InfiniteStam, "Infinite Stamina", "Prevents you from losing any stamina.");
                 UI.Checkbox(ref settingsData.b_InfiniteCharge, "Infinite Charge", "Prevents your items from losing any charge.");
                 UI.Checkbox(ref settingsData.b_InfiniteZapGun, "Infinite Zap Gun", "Infinitely stuns enemies with the zap-gun.");
@@ -437,12 +434,12 @@ namespace ProjectApparatus
                 GUILayout.BeginHorizontal();
                 foreach (PlayerControllerB player in Instance.players)
                 {
-                    if (!IsPlayerValid(player)) continue;
+                    if (!PAUtils.IsPlayerValid(player)) continue;
                     UI.Tab(PAUtils.TruncateString(player.playerUsername, 12), ref selectedPlayer, player, true);
                 }
                 GUILayout.EndHorizontal();
 
-                if (!IsPlayerValid(selectedPlayer))
+                if (!PAUtils.IsPlayerValid(selectedPlayer))
                     selectedPlayer = null;
 
                 if (selectedPlayer)
@@ -452,18 +449,19 @@ namespace ProjectApparatus
 
                     // We keep toggles outside of the isPlayerDead check so that users can toggle them on/off no matter their condition.
 
-                    bool DemigodCheck = Settings.Instance.b_DemiGod[selectedPlayer];
-                    UI.Checkbox(ref DemigodCheck, "Demigod", "Automatically refills the selected player's health if below zero.");
-                    Settings.Instance.b_DemiGod[selectedPlayer] = DemigodCheck;
+                    bool b_DemiGod = Settings.Instance.b_DemiGod[selectedPlayer];
+                    UI.Checkbox(ref b_DemiGod, "Demigod", "Automatically refills the selected player's health if below zero.");
+                    Settings.Instance.b_DemiGod[selectedPlayer] = b_DemiGod;
 
-                    bool ObjectSpam = Settings.Instance.b_SpamObjects[selectedPlayer];
-                    UI.Checkbox(ref ObjectSpam, "Object Spam", "Spam places objects on the player to annoy/trap them.");
-                    Settings.Instance.b_SpamObjects[selectedPlayer] = ObjectSpam;
+                    bool b_SpamObjects = Settings.Instance.b_SpamObjects[selectedPlayer];
+                    UI.Checkbox(ref b_SpamObjects, "Object Spam", "Spam places objects on the player to annoy/trap them.");
+                    Settings.Instance.b_SpamObjects[selectedPlayer] = b_SpamObjects;
 
                     UI.Checkbox(ref Settings.Instance.b_HideObjects, "Hide Objects", "Hides spammed objects from the selected player.");
 
                     if (!selectedPlayer.isPlayerDead)
                     {
+                        UI.Button("Spawn Enemy", "Spawns a random enemy on the selected player.", () => { RoundManager.Instance.SpawnEnemyOnServer(selectedPlayer.gameplayCamera.transform.position, 50); });
                         UI.Button("Kill", "Kills the currently selected player.", () => { selectedPlayer.DamagePlayerFromOtherClientServerRpc(selectedPlayer.health + 1, new Vector3(900, 900, 900), 0); });
                         
                         UI.Button("Teleport To", "Teleports you to the currently selected player.", () => { Instance.localPlayer.TeleportPlayer(selectedPlayer.playerGlobalHead.position); });
@@ -668,6 +666,7 @@ namespace ProjectApparatus
             {
                 UI.Checkbox(ref settingsData.b_Crosshair, "Crosshair", "Displays a crosshair on the screen.");
                 UI.Checkbox(ref settingsData.b_DisplayGroupCredits, "Display Group Credits", "Shows how many credits you have.");
+                UI.Checkbox(ref settingsData.b_DisplayLootInShip, "Display Loot In Ship", "Shows the value of all the items you have gathered in the ship.");
                 UI.Checkbox(ref settingsData.b_DisplayQuota, "Display Quota", "Shows the current quota.");
                 UI.Checkbox(ref settingsData.b_DisplayDaysLeft, "Display Days Left", "Shows the time you have left to meet quota.");
                 UI.Checkbox(ref settingsData.b_CenteredIndicators, "Centered Indicators", "Displays the above indicators at the center of the screen.");
@@ -715,14 +714,14 @@ namespace ProjectApparatus
         {
             if (!shouldDisplay) return;
 
-            foreach (T obj in objects)
+            PAUtils.ForEach(objects, (obj) =>
             {
-                if (obj != null && obj.gameObject.activeSelf)
+                if (obj.gameObject.activeSelf)
                 {
                     float distanceToPlayer = PAUtils.GetDistance(Instance.localPlayer.gameplayCamera.transform.position,
                         obj.transform.position);
                     Vector3 pos;
-                    if (PAUtils.WorldToScreen(Features.Thirdperson.ThirdpersonCamera.ViewState ? Features.Thirdperson.ThirdpersonCamera._camera 
+                    if (PAUtils.WorldToScreen(Features.Thirdperson.ThirdpersonCamera.ViewState ? Features.Thirdperson.ThirdpersonCamera._camera
                         : Instance.localPlayer.gameplayCamera, obj.transform.position, out pos))
                     {
                         string ObjName = PAUtils.ConvertFirstLetterToUpperCase(labelSelector(obj));
@@ -731,7 +730,7 @@ namespace ProjectApparatus
                         Render.String(Style, pos.x, pos.y, 150f, 50f, ObjName, colorSelector(obj), true, true);
                     }
                 }
-            }
+            });
         }
 
         public void DisplayDeadPlayers()
@@ -813,7 +812,7 @@ namespace ProjectApparatus
         {
             DisplayObjects(
                 Instance.players.Where(playerControllerB =>
-                    IsPlayerValid(playerControllerB) &&
+                    PAUtils.IsPlayerValid(playerControllerB) &&
                     !playerControllerB.IsLocalPlayer &&
                      playerControllerB.playerUsername != Instance.localPlayer.playerUsername &&
                     !playerControllerB.isPlayerDead
@@ -855,14 +854,6 @@ namespace ProjectApparatus
             );
         }
 
-        private Color GetLootColor(int value)
-        {
-            if (value <= 15) return settingsData.c_smallLoot;
-            if (value > 15 && value <= 35) return settingsData.c_medLoot;
-            if (value >= 36) return settingsData.c_bigLoot;
-            else return settingsData.c_Loot;
-        }
-
         private void DisplayLoot()
         {
             DisplayObjects(
@@ -888,7 +879,7 @@ namespace ProjectApparatus
                         text += " [" + scrapValue.ToString() + "C]";
                     return text;
                 },
-                grabbableObject => GetLootColor(grabbableObject.scrapValue)
+                grabbableObject => PAUtils.GetLootColor(grabbableObject.scrapValue)
             );
         }
 
