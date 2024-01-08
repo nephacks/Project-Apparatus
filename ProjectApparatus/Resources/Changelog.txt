@@ -1,4 +1,4 @@
-﻿v1.1.9
+﻿v1.1.9d
 • [+] Added Night Vision Intensity slider to Self tab.
 • [+] Added 'Object Spam' to Players tab. Spams ship objects on the selected player.
 • [/] 'Aggro Enemies' now effects spiders.

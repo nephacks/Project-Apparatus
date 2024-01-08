@@ -1,16 +1,27 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Collections.Generic;
 using GameNetcodeStuff;
+using Dissonance;
+using Dissonance.Integrations.Unity_NFGO;
+using Hax;
 using HarmonyLib;
 using Steamworks;
+using TMPro;
 using Unity.Netcode;
+using Netcode.Transports.Facepunch;
 using UnityEngine;
+using UnityEngine.Audio;
+using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
+using UnityEngine.Video;
 using UnityEngine.Rendering.HighDefinition;
+using static IngamePlayerSettings;
 using static UnityEngine.Rendering.DebugUI;
-
 namespace ProjectApparatus
 {
+
     [HarmonyPatch(typeof(PlayerControllerB), "Start")]
     public class PlayerControllerB_Start_Patch
     {
@@ -45,6 +56,31 @@ namespace ProjectApparatus
             return true;
         }
 
+        [HarmonyPatch(typeof(PlayerControllerB), "SendNewPlayerValuesServerRpc")]
+        class AntiKickPatch
+        {
+            private readonly SettingsData settingsData = Settings.Instance.settingsData;
+            static bool Prefix(PlayerControllerB __instance)
+            {
+
+                //if (!settingsData.b_AntiKick) return true;
+                if (!Settings.Instance.settingsData.b_AntiKick) return true;
+
+                ulong[] playerSteamIds = new ulong[__instance.playersManager.allPlayerScripts.Length];
+
+                for (int i = 0; i < __instance.playersManager.allPlayerScripts.Length; i++)
+                {
+                    playerSteamIds[i] = __instance.playersManager.allPlayerScripts[i].playerSteamId;
+                }
+
+                playerSteamIds[__instance.playerClientId] = SteamClient.SteamId;
+
+                _ = __instance.Reflect().InvokeInternalMethod("SendNewPlayerValuesClientRpc", playerSteamIds);
+
+                return false;
+            }
+        }
+
         public static void Postfix(PlayerControllerB __instance)
         {
             if (__instance == GameObjectManager.Instance.localPlayer)
@@ -63,6 +99,26 @@ namespace ProjectApparatus
         }
     }
 
+    //[HarmonyPatch(typeof(StartOfRound), "ManuallyEjectPlayersServerRpc")]
+    //public static class ManuallyEjectPlayersServerRpcPatch
+    //{
+    //    static bool Prefix(ref NetworkManager __instance, ref __RpcExecStage __rpc_exec_stage, ref bool inShipPhase, ref bool firingPlayersCutsceneRunning, ref List<NetworkObject> fullyLoadedPlayers)
+    //    {
+    //        // Your code to replicate the necessary parts of the original method, excluding the owner check.
+    //        // For example:
+    //        if ((object)__instance == null || !__instance.IsListening)
+    //        {
+    //            return false;
+    //        }
+    //
+    //        // Continue with the rest of the method's logic, modifying as necessary.
+    //        // ...
+    //
+    //        // Returning false to skip the original implementation
+    //        return false;
+    //    }
+    //}
+    //
     [HarmonyPatch(typeof(PlayerControllerB), "LateUpdate")]
     public class PlayerControllerB_LateUpdate_Patch
     {
@@ -86,6 +142,11 @@ namespace ProjectApparatus
                     NetworkObject networkObject = shipObject.parentObject.GetComponent<NetworkObject>();
                     if (StartOfRound.Instance.unlockablesList.unlockables[shipObject.unlockableID].inStorage)
                         StartOfRound.Instance.ReturnUnlockableFromStorageServerRpc(shipObject.unlockableID);
+
+                    //Vector3 newRotation = new Vector3(45, 30, 60);
+                    //__instance.transform.eulerAngles = newRotation;
+                    //shipObject.mainMesh.transform.eulerAngles = newRotation;
+
 
                     GameObjectManager.Instance.shipBuildModeManager.PlaceShipObject(__instance.transform.position,
                         __instance.transform.eulerAngles,

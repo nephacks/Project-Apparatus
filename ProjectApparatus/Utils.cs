@@ -106,6 +106,7 @@ namespace ProjectApparatus
             Self,
             Misc,
             ESP,
+            Debug,
             Players,
             Graphics,
             Upgrades,

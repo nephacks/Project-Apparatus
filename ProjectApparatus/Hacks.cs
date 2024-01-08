@@ -8,6 +8,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using static GameObjectManager;
 using System.Windows.Forms;
+using Unity.Netcode;
+using System.IO;
+using UnityEngine.ProBuilder.Shapes;
+using Hax;
+using static UnityEngine.GraphicsBuffer;
 
 namespace ProjectApparatus
 {
@@ -65,7 +70,8 @@ namespace ProjectApparatus
                 if (settingsData.b_DisplayDaysLeft && TimeOfDay.Instance) Render.String(Style, centeredPos.x, centeredPos.y + 7 + iY, 150f, Settings.TEXT_HEIGHT, "Days Left: " + TimeOfDay.Instance.daysUntilDeadline, GUI.color, true, true); iY += Settings.TEXT_HEIGHT - 10f;
             }
 
-            string Watermark = "Project Apparatus";
+            //s/tring buildDateTime = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "BuildDateTime.txt")).Trim();
+            string Watermark = "BoohWare";
             Watermark += " | v" + settingsData.version;
             if (!Settings.Instance.b_isMenuOpen) Watermark += " | Press INSERT";
             if (!settingsData.b_CenteredIndicators)
@@ -102,6 +108,7 @@ namespace ProjectApparatus
             UI.Tab("Self", ref UI.nTab, UI.Tabs.Self);
             UI.Tab("Misc", ref UI.nTab, UI.Tabs.Misc);
             UI.Tab("ESP", ref UI.nTab, UI.Tabs.ESP);
+            UI.Tab("Debug", ref UI.nTab, UI.Tabs.Debug);
             UI.Tab("Players", ref UI.nTab, UI.Tabs.Players);
             UI.Tab("Graphics", ref UI.nTab, UI.Tabs.Graphics);
             UI.Tab("Upgrades", ref UI.nTab, UI.Tabs.Upgrades);
@@ -111,7 +118,7 @@ namespace ProjectApparatus
 
             UI.TabContents("Start", UI.Tabs.Start, () =>
             {
-                GUILayout.Label($"Welcome to Project Apparatus v{settingsData.version}!\n\n" +
+                GUILayout.Label($"Welcome to Project Apparatus MOD v{settingsData.version}!\n\n" +
                                 $"If you have suggestions, please create a pull request in the repo or reply to the UC thread.\n" +
                                 $"If you find bugs, please provide some steps on how to reproduce the problem and create an issue or pull request in the repo or reply to the UC thread");
                 GUILayout.Space(20f);
@@ -187,6 +194,109 @@ namespace ProjectApparatus
                 GUILayout.EndHorizontal();
                 settingsData.fl_NoclipSpeed = Mathf.RoundToInt(GUILayout.HorizontalSlider(settingsData.fl_NoclipSpeed, 1, 100));
             });
+
+
+            UI.TabContents("Debug", UI.Tabs.Debug, () =>
+            {
+                //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
+                UI.Checkbox(ref settingsData.b_Horn, "hupen laut", "spawnt schiff hupe und hupen.");
+                UI.Checkbox(ref settingsData.b_Turret, "alle turrets sauer machen", ".");
+                //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
+                //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
+                //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
+                //UI.Checkbox(ref settingsData.b_InfiniteStam, "Infinite Stamina", "Prevents you from losing any stamina.");
+                //settingsData.i_NightVision = Mathf.RoundToInt(GUILayout.HorizontalSlider(settingsData.i_NightVision, 1, 100));
+
+                // Field to store original rotations
+                Dictionary<PlaceableShipObject, Vector3> originalRotations = new Dictionary<PlaceableShipObject, Vector3>();
+
+                // Inversion button logic
+                UI.Button("alles im schiff auf kopf stellen", "stellt alles auf kopf", () =>
+                {
+                    foreach (PlaceableShipObject shipObject in GameObjectManager.Instance.shipObjects)
+                    {
+                        NetworkObject networkObject = shipObject.parentObject.GetComponent<NetworkObject>();
+                        if (!originalRotations.ContainsKey(shipObject))
+                        {
+                            originalRotations[shipObject] = shipObject.mainMesh.transform.eulerAngles;
+                        }
+
+                        Vector3 shipPosition = shipObject.transform.position;
+                        Vector3 invertedRotation = new Vector3(90, shipObject.transform.eulerAngles.y, shipObject.transform.eulerAngles.z);
+
+                        shipObject.mainMesh.transform.eulerAngles = invertedRotation;
+                        GameObjectManager.Instance.shipBuildModeManager.PlaceShipObject(shipPosition, invertedRotation, shipObject);
+                        GameObjectManager.Instance.shipBuildModeManager.CancelBuildMode(false);
+                        GameObjectManager.Instance.shipBuildModeManager.PlaceShipObjectServerRpc(shipPosition,
+                            invertedRotation,
+                            networkObject,
+                            -1);
+                    }
+                });
+
+                UI.Button("upgrades weg", "macht alle upgrades einfach weg", () =>
+                {
+                    foreach (PlaceableShipObject shipObject in GameObjectManager.Instance.shipObjects)
+                    {
+                        // Assuming the name can be accessed via shipObject or one of its components
+                        string shipObjectName = shipObject.mainMesh.name; // or any other relevant property that holds the name
+
+                        // List of object names to keep
+                        List<string> namesToKeep = new List<string> { "Terminal", "StorageCloset", "FileCabinet", "Bunkbeds" };
+
+                        // Check if this shipObject's name is in the list of names to keep
+                        if (namesToKeep.Contains(shipObjectName))
+                        {
+                            // Skip this iteration and do not move this object
+                            Debug.Log(shipObjectName);
+                            continue;
+                            
+                        }
+
+                        Debug.Log(shipObject);
+
+                        NetworkObject networkObject = shipObject.parentObject.GetComponent<NetworkObject>();
+                        if (StartOfRound.Instance.unlockablesList.unlockables[shipObject.unlockableID].inStorage)
+                            StartOfRound.Instance.ReturnUnlockableFromStorageServerRpc(shipObject.unlockableID);
+                        
+                        if (!originalRotations.ContainsKey(shipObject))
+                        {
+                            originalRotations[shipObject] = shipObject.mainMesh.transform.eulerAngles;
+                        }
+
+                        Vector3 gonePosition = new Vector3(9223372036854775807, 0, 0);
+
+                        shipObject.mainMesh.transform.eulerAngles = shipObject.mainMesh.transform.eulerAngles;
+                        GameObjectManager.Instance.shipBuildModeManager.PlaceShipObject(gonePosition, shipObject.mainMesh.transform.eulerAngles, shipObject);
+                        GameObjectManager.Instance.shipBuildModeManager.CancelBuildMode(false);
+                        GameObjectManager.Instance.shipBuildModeManager.PlaceShipObjectServerRpc(gonePosition,
+                            shipObject.mainMesh.transform.eulerAngles,
+                            networkObject,
+                            -1);
+                    }
+                });
+
+
+                UI.Button("garage bei experimentation zumachen", "", () =>
+                {
+                    var interactTriggers = GameObject.FindObjectsOfType<InteractTrigger>();
+
+                    foreach (var interactTrigger in interactTriggers)
+                    {
+                        // Check if the interactTrigger is valid and its name is "Cube" and its parent's name is "Cutscenes"
+                        if (interactTrigger != null && interactTrigger.name == "Cube" && interactTrigger.transform.parent.name == "Cutscenes")
+                        {
+                            interactTrigger.randomChancePercentage = 100;
+                            interactTrigger.Interact(Instance.localPlayer.transform);
+                        }
+                    }
+
+                });
+
+
+            });
+
+
 
             UI.TabContents("Misc", UI.Tabs.Misc, () =>
             {
@@ -337,7 +447,7 @@ namespace ProjectApparatus
 
                 if (selectedPlayer)
                 {
-                    UI.Header("Selected Player: " + selectedPlayer.playerUsername);
+                    UI.Header("Selected Player: " + selectedPlayer.playerUsername +" Client ID: " + selectedPlayer.playerClientId);
                     Settings.Instance.InitializeDictionaries(selectedPlayer);
 
                     // We keep toggles outside of the isPlayerDead check so that users can toggle them on/off no matter their condition.
@@ -355,6 +465,7 @@ namespace ProjectApparatus
                     if (!selectedPlayer.isPlayerDead)
                     {
                         UI.Button("Kill", "Kills the currently selected player.", () => { selectedPlayer.DamagePlayerFromOtherClientServerRpc(selectedPlayer.health + 1, new Vector3(900, 900, 900), 0); });
+                        
                         UI.Button("Teleport To", "Teleports you to the currently selected player.", () => { Instance.localPlayer.TeleportPlayer(selectedPlayer.playerGlobalHead.position); });
                         UI.Button("Teleport Enemies To", "Teleports all enemies to the currently selected player.", () =>
                         {
@@ -369,7 +480,40 @@ namespace ProjectApparatus
                                 }
                             }
                         });
-                        UI.Button("Teleport Player To Ship", "Teleports the selected into the ship. (Host only)", () =>
+
+
+
+                        //Landmine[] landmines = UnityEngine.Object.FindObjectsOfType<Landmine>();
+
+                        //UI.Button($"Teleport landmines (geht nicht) ({landmines.Length})", "Teleports all land mine to the currently selected player.", () =>
+                        //{
+                        //    //Landmine[] landmines = Object.FindObjectsOfType<Landmine>();
+                        //    //UnityEngine.Object[] landmines = UnityEngine.Object.FindObjectsOfType<Landmine>();
+                        //    //Vector3 selectedPlayerPosition = GetSelectedPlayerPosition(); // Define this method as per your game's context
+                        //
+                        //    foreach (Landmine landmine in landmines)
+                        //    {
+                        //        if (landmine != null)
+                        //        {
+                        //            // Log landmine details
+                        //            Debug.Log($"Landmine ID: {landmine.GetInstanceID()}, Position: {landmine.transform.position}");
+                        //
+                        //            // Teleport landmine to selected player position
+                        //            landmine.transform.position = selectedPlayer.transform.position;
+                        //            //landmine.ChangeEnemyOwnerServerRpc(Instance.localPlayer.actualClientId);
+                        //            //landmine.SyncPositionToClients();
+                        //        }
+                        //    }
+
+                            //Landmine[] array = Object.FindObjectsOfType<Landmine>()
+                            //foreach (EnemyAI enemy in Instance.enemies)
+                            //{
+                            //    if (enemy != null)
+                            //    {
+                            //    }
+                            //}
+                        //});
+                        UI.Button("Teleport Player To Ship (host only)", "Teleports the selected into the ship. (Host only)", () =>
                         {
                             Instance.shipTeleporter.TeleportPlayerOutServerRpc((int)selectedPlayer.playerClientId, Instance.shipRoom.transform.position);
                         });
@@ -411,7 +555,7 @@ namespace ProjectApparatus
                     }
 
                     Settings.Instance.str_ChatAsPlayer = GUILayout.TextField(Settings.Instance.str_ChatAsPlayer, Array.Empty<GUILayoutOption>());
-                    UI.Button("Send Message", "Sends a message in chat as the selected player.", () =>
+                    UI.Button("Nachricht als spieler senden", "Sends a message in chat as the selected player.", () =>
                     {
                         PAUtils.SendChatMessage(Settings.Instance.str_ChatAsPlayer, (int)selectedPlayer.playerClientId);
                     });
@@ -805,6 +949,56 @@ namespace ProjectApparatus
 
             if (settingsData.b_RemoveVisor) 
                 Instance.localVisor?.SetActive(false);
+
+            if (settingsData.b_Horn)
+            {
+                if (!StartOfRound.Instance.unlockablesList.unlockables[(int)UnlockableUpgrade.LoudHorn].hasBeenUnlockedByPlayer)
+                {
+                    StartOfRound.Instance.BuyShipUnlockableServerRpc((int)UnlockableUpgrade.LoudHorn, Instance.shipTerminal.groupCredits);
+                    StartOfRound.Instance.SyncShipUnlockablesServerRpc();
+                }
+
+                ShipAlarmCord[] shipAlarmCords = UnityEngine.Object.FindObjectsOfType<ShipAlarmCord>();
+                if (shipAlarmCords != null)
+                {
+                    foreach (ShipAlarmCord shipAlarmCord in shipAlarmCords)
+                    {
+                        Debug.Log("ShipAlarmCord found: " + shipAlarmCord.ToString());
+                        shipAlarmCord.PullCordServerRpc(-1);
+                    }
+                }
+                else
+                {
+                    Debug.Log("No ShipAlarmCord objects found.");
+                }
+            }
+
+            if (settingsData.b_Turret)
+            {
+                foreach (var turret in UnityEngine.Object.FindObjectsOfType<Turret>())
+                {
+                    turret.EnterBerserkModeServerRpc(-1);
+                }
+            }
+
+            if (settingsData.b_Horn != true)
+            {
+                ShipAlarmCord[] shipAlarmCords = UnityEngine.Object.FindObjectsOfType<ShipAlarmCord>();
+                if (shipAlarmCords != null)
+                {
+                    foreach (ShipAlarmCord shipAlarmCord in shipAlarmCords)
+                    {
+                        //Debug.Log("ShipAlarmCord found: " + shipAlarmCord.ToString());
+                        //shipAlarmCord.StopPullingCordServerRpc(-1);
+                        //Debug.Log("ShipAlarmCord found: unpulling PLEASE WORK");
+                    }
+                }
+                else
+                {
+                    //Debug.Log("No ShipAlarmCord objects found.");
+                }
+                
+            }
 
             if (settingsData.b_AnonChatSpam)
                 PAUtils.SendChatMessage(settingsData.str_ChatMessage);

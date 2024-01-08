@@ -10,7 +10,7 @@ namespace ProjectApparatus
     [System.Serializable]
     public class SettingsData
     {
-        public readonly string version = "1.1.9";
+        public readonly string version = "1.0";
 
         /* ESP */
         public bool b_EnableESP;
@@ -72,6 +72,11 @@ namespace ProjectApparatus
 
         /* Graphics */
         public bool b_DisableFog, b_DisableBloom, b_DisableDepthOfField, b_DisableVignette, b_DisableFilmGrain, b_DisableExposure;
+
+        /* Modded */
+        public bool b_AntiKick;
+        public bool b_Horn;
+        public bool b_Turret;
 
         /* Settings*/
         public bool b_DisplayGroupCredits = true;
