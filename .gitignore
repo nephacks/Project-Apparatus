@@ -397,3 +397,8 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 *.dll
+FindObject.cs
+ProjectApparatus/Hax.cs
+ProjectApparatus/MultiObjectPool.cs
+ProjectApparatus/Reflector.cs
+ProjectApparatus/SingleObjectPool.cs
