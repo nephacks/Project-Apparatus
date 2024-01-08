@@ -279,11 +279,11 @@ namespace ProjectApparatus
                 {
                     if (Instance.shipTerminal)
                     {
-                        Instance.shipTerminal.groupCredits = 0
+                        Instance.shipTerminal.groupCredits = 0;
                         Instance.shipTerminal.SyncGroupCreditsServerRpc(Instance.shipTerminal.groupCredits,
                             Instance.shipTerminal.numberOfItemsInDropship);
                     }
-                    Instance.shipTerminal.groupCredits
+                    //Instance.shipTerminal.groupCredits
                 });
 
                 UI.Button("close garage door experimentation", "", () =>
