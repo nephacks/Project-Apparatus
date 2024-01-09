@@ -59,6 +59,7 @@
     <Compile Include="Features.cs" />
     <Compile Include="GameObjectManager.cs" />
     <Compile Include="Hacks.cs" />
+    <Compile Include="Leaderboard.cs" />
     <Compile Include="Loader.cs" />
     <Compile Include="Patches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

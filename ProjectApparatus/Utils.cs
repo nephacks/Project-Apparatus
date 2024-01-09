@@ -28,8 +28,8 @@ namespace ProjectApparatus
         public static bool IsPlayerValid(PlayerControllerB plyer)
         {
             return (plyer != null &&
-                    !plyer.disconnectedMidGame &&
-                    !plyer.playerUsername.Contains("Player #"));
+                    !plyer.disconnectedMidGame);// &&
+                    //!plyer.playerUsername.Contains("Player #"));
         }
 
         public static Color GetLootColor(int value)

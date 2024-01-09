@@ -10,7 +10,7 @@ namespace ProjectApparatus
     [System.Serializable]
     public class SettingsData
     {
-        public readonly string version = "1.0";
+        public readonly string version = "1.01";
 
         /* ESP */
         public bool b_EnableESP;
@@ -32,6 +32,7 @@ namespace ProjectApparatus
         public bool b_InfiniteStam, b_InfiniteCharge, b_InfiniteZapGun, b_InfiniteShotgunAmmo, b_InfiniteItems, b_UnlimitedGrabDistance;
         public bool b_RemoveWeight;
         public bool b_RemoveVisor;
+       
         public bool b_CameraResolution;
         public bool b_OneHandAllObjects;
         public bool b_DisableFallDamage;
@@ -213,5 +214,6 @@ namespace ProjectApparatus
         }
 
         private static Settings instance;
+        internal static bool AntiKick { get; }
     }
 }

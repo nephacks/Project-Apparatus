@@ -56,7 +56,7 @@ public class GameObjectManager
             CollectObjectsOfType(turrets);
             CollectObjectsOfType(doorLocks);
             CollectObjectsOfType(entranceTeleports);
-            CollectObjectsOfType(players, p => !p.name.StartsWith("Player #"));
+            CollectObjectsOfType(players);//, p => !p.name.StartsWith("Player #"));
             CollectObjectsOfType(enemies);
             CollectObjectsOfType(steamValves);
             CollectObjectsOfType(shipObjects);

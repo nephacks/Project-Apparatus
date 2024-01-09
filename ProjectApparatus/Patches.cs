@@ -21,6 +21,30 @@ using static IngamePlayerSettings;
 using static UnityEngine.Rendering.DebugUI;
 namespace ProjectApparatus
 {
+    [HarmonyPatch(typeof(PlayerControllerB), "SendNewPlayerValuesServerRpc")]
+    public class AntiKickPatch
+    {
+        static bool Prefix(PlayerControllerB __instance)
+        {
+            if (Settings.AntiKick) return true;
+
+            ulong[] playerSteamIds = new ulong[__instance.playersManager.allPlayerScripts.Length];
+
+            for (int i = 0; i < __instance.playersManager.allPlayerScripts.Length; i++)
+            {
+                playerSteamIds[i] = __instance.playersManager.allPlayerScripts[i].playerSteamId;
+            }
+
+            playerSteamIds[__instance.playerClientId] = SteamClient.SteamId;
+
+            // Using reflection to invoke the method "SendNewPlayerValuesClientRpc"
+            typeof(PlayerControllerB)
+                .GetMethod("SendNewPlayerValuesClientRpc", BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(__instance, new object[] { playerSteamIds });
+
+            return false;
+        }
+    }
 
     [HarmonyPatch(typeof(PlayerControllerB), "Start")]
     public class PlayerControllerB_Start_Patch

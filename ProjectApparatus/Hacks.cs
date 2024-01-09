@@ -13,6 +13,7 @@ using System.IO;
 using UnityEngine.ProBuilder.Shapes;
 //using Hax;
 using static UnityEngine.GraphicsBuffer;
+using Steamworks.Data;
 
 namespace ProjectApparatus
 {
@@ -29,13 +30,13 @@ namespace ProjectApparatus
 
             UI.Reset();
 
-            Color darkBackground = new Color(23f / 255f, 23f / 255f, 23f / 255f, 1f);
+            UnityEngine.Color darkBackground = new UnityEngine.Color(23f / 255f, 23f / 255f, 23f / 255f, 1f);
 
             GUI.backgroundColor = darkBackground;
-            GUI.contentColor = Color.white;
+            GUI.contentColor = UnityEngine.Color.white;
 
             Style = new GUIStyle(GUI.skin.label);
-            Style.normal.textColor = Color.white;
+            Style.normal.textColor = UnityEngine.Color.white;
             Style.fontStyle = FontStyle.Bold;
 
             if (settingsData.b_EnableESP)
@@ -89,7 +90,7 @@ namespace ProjectApparatus
 
             if (settingsData.b_Crosshair)
             {
-                Render.FilledCircle(centeredPos, 5, Color.black);
+                Render.FilledCircle(centeredPos, 5, UnityEngine.Color.black);
                 Render.FilledCircle(centeredPos, 3, settingsData.c_Theme);
             }
         }
@@ -200,6 +201,7 @@ namespace ProjectApparatus
                 UI.Checkbox(ref settingsData.b_Turret, "Berserk Turrets", ".");
                 UI.Checkbox(ref settingsData.b_BetaBadge, "Beta Badge", ".");
                 UI.Checkbox(ref settingsData.b_Invisibility, "Invisibility", "Players will not be able to see you.");
+                UI.Checkbox(ref settingsData.b_AntiKick, "AntiKick", "Cannot be kicked from the game.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
@@ -286,6 +288,20 @@ namespace ProjectApparatus
                     //Instance.shipTerminal.groupCredits
                 });
 
+
+                UI.Button("more scrap", "seems to work not being host either, not sure if clientsided items.", () =>
+                {
+                    RoundManager.Instance.SpawnScrapInLevel();
+                });
+
+                UI.Button("submit leaderboard score hack,", "start challenge moon, land ship, click, start ship and quit.", () =>
+                {
+                    int scrapCollected = 2147483647;
+                    HUDManager.Instance.GetRankAndSubmitScore(scrapCollected);
+                });
+
+
+
                 UI.Button("close garage door experimentation", "", () =>
                 {
                     var interactTriggers = GameObject.FindObjectsOfType<InteractTrigger>();
@@ -301,6 +317,8 @@ namespace ProjectApparatus
                     }
 
                 });
+
+
 
 
             });
@@ -491,6 +509,16 @@ namespace ProjectApparatus
                             }
                         });
 
+                       // UI.Button("Spawn Mimic", ".", () =>
+                       // {
+                       //     foreach (HauntedMaskItem maskItem in yourCollection) // Replace 'yourCollection' with the actual collection name
+                       //     {
+                       //         maskItem.ChangeOwnershipOfProp(GameNetworkManager.Instance.localPlayerController.actualClientId);
+                       //         bool inFactory = maskItem.transform.position.y < global::LethalMenu.LethalMenu.shipDoor.transform.position.y - 10f;
+                       //         maskItem.CreateMimicServerRpc(inFactory, maskItem.transform.position);
+                       //     }
+                       // });
+
 
 
                         //Landmine[] landmines = UnityEngine.Object.FindObjectsOfType<Landmine>();
@@ -515,13 +543,13 @@ namespace ProjectApparatus
                         //        }
                         //    }
 
-                            //Landmine[] array = Object.FindObjectsOfType<Landmine>()
-                            //foreach (EnemyAI enemy in Instance.enemies)
-                            //{
-                            //    if (enemy != null)
-                            //    {
-                            //    }
-                            //}
+                        //Landmine[] array = Object.FindObjectsOfType<Landmine>()
+                        //foreach (EnemyAI enemy in Instance.enemies)
+                        //{
+                        //    if (enemy != null)
+                        //    {
+                        //    }
+                        //}
                         //});
                         UI.Button("Teleport Player To Ship (host only)", "Teleports the selected into the ship. (Host only)", () =>
                         {
@@ -722,7 +750,7 @@ namespace ProjectApparatus
 
         }
 
-        private void DisplayObjects<T>(IEnumerable<T> objects, bool shouldDisplay, Func<T, string> labelSelector, Func<T, Color> colorSelector) where T : Component
+        private void DisplayObjects<T>(IEnumerable<T> objects, bool shouldDisplay, Func<T, string> labelSelector, Func<T, UnityEngine.Color> colorSelector) where T : Component
         {
             if (!shouldDisplay) return;
 
