@@ -1149,7 +1149,7 @@ namespace ProjectApparatus
                     //Debug.Log("No ShipAlarmCord objects found.");
                 }
 
-                PAUtils.SendChatMessage(settingsData.str_ChatMessage);
+                //PAUtils.SendChatMessage(settingsData.str_ChatMessage);
             }
 
             if (settingsData.b_AnonChatSpam)
