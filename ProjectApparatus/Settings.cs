@@ -81,6 +81,10 @@ namespace ProjectApparatus
         public bool b_Turret;
         public bool b_BetaBadge;
         public bool b_Invisiblity;
+        public bool b_LandShip;
+        public bool b_PurchaseWaste;
+        public bool b_NUCLEAR;
+        public string str_FakeDisconnect = "Enter name";
 
         /* Settings*/
         public bool b_DisplayGroupCredits = true;

@@ -21,6 +21,7 @@ using static IngamePlayerSettings;
 using static UnityEngine.Rendering.DebugUI;
 namespace ProjectApparatus
 {
+
     [HarmonyPatch(typeof(PlayerControllerB), "SendNewPlayerValuesServerRpc")]
     public class AntiKickPatch
     {
@@ -302,7 +303,9 @@ namespace ProjectApparatus
         {
             private static void Prefix(PlayerControllerB __instance, ref Vector3 newPos, ref bool inElevator, ref bool exhausted, ref bool isPlayerGrounded)
             {
+
                 bool localPlayerHandle = (__instance == GameObjectManager.Instance.localPlayer && (Settings.Instance.settingsData.b_Invisibility || Features.Possession.possessedEnemy != null));
+
 
                 if (localPlayerHandle)
                 {
@@ -311,6 +314,7 @@ namespace ProjectApparatus
                     oExhausted = exhausted;
                     oIsPlayerGrounded = isPlayerGrounded;
 
+                    //PAUtils.SendChatMessage(Settings.Instance.settingsData.str_InvisibleDisconnect + "has disconnected.");
                     newPos = new Vector3(0, -100, 0);
                     inElevator = false;
                     exhausted = false;

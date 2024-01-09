@@ -106,6 +106,7 @@ namespace ProjectApparatus
             UI.Tab("Misc", ref UI.nTab, UI.Tabs.Misc);
             UI.Tab("ESP", ref UI.nTab, UI.Tabs.ESP);
             UI.Tab("Debug", ref UI.nTab, UI.Tabs.Debug);
+            UI.Tab("Nuclear", ref UI.nTab, UI.Tabs.Nuclear);
             UI.Tab("Players", ref UI.nTab, UI.Tabs.Players);
             UI.Tab("Graphics", ref UI.nTab, UI.Tabs.Graphics);
             UI.Tab("Upgrades", ref UI.nTab, UI.Tabs.Upgrades);
@@ -202,6 +203,7 @@ namespace ProjectApparatus
                 UI.Checkbox(ref settingsData.b_BetaBadge, "Beta Badge", ".");
                 UI.Checkbox(ref settingsData.b_Invisibility, "Invisibility", "Players will not be able to see you.");
                 UI.Checkbox(ref settingsData.b_AntiKick, "AntiKick", "Cannot be kicked from the game.");
+                UI.Checkbox(ref settingsData.b_LandShip, "Land Ship Spam", "Tries to land ship as soon as possible.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
@@ -319,10 +321,20 @@ namespace ProjectApparatus
                 });
 
 
+                settingsData.str_FakeDisconnect = GUILayout.TextField(settingsData.str_FakeDisconnect, Array.Empty<GUILayoutOption>());
+                UI.Button("Send fake disconnect message", "Anonymously sends a message in chat.", () =>
+                {
+                    PAUtils.SendChatMessage(settingsData.str_FakeDisconnect + " has disconnected");
+                });
+
 
 
             });
 
+            UI.TabContents("NUCLEAR", UI.Tabs.Nuclear, () =>
+            {
+                UI.Checkbox(ref settingsData.b_NUCLEAR, "tumble dry", "tumble dry");
+            });
 
 
             UI.TabContents("Misc", UI.Tabs.Misc, () =>
@@ -591,6 +603,12 @@ namespace ProjectApparatus
                         Settings.Instance.str_HealthToHeal = GUILayout.TextField(Settings.Instance.str_HealthToHeal, Array.Empty<GUILayoutOption>());
                         UI.Button("Heal", "Heals the player for a given amount.", () => { selectedPlayer.DamagePlayerFromOtherClientServerRpc(-int.Parse(Settings.Instance.str_HealthToHeal), new Vector3(900, 900, 900), 0); });
                     }
+
+                    //settingsData.str_FakeDisconnect = GUILayout.TextField(settingsData.str_FakeDisconnect, Array.Empty<GUILayoutOption>());
+                    UI.Button("Send fake disconnect message", "Anonymously sends a message in chat.", () =>
+                    {
+                        PAUtils.SendChatMessage(selectedPlayer.playerUsername + " has disconnected");
+                    });
 
                     Settings.Instance.str_ChatAsPlayer = GUILayout.TextField(Settings.Instance.str_ChatAsPlayer, Array.Empty<GUILayoutOption>());
                     UI.Button("Send message", "Sends a message in chat as the selected player.", () =>
@@ -1012,6 +1030,108 @@ namespace ProjectApparatus
                 }
             }
 
+            if (settingsData.b_LandShip)
+            {
+                StartOfRound.Instance.StartGameServerRpc();
+            }
+
+            if (settingsData.b_PurchaseWaste)
+            {
+
+            }
+
+            if (settingsData.b_NUCLEAR)
+            {
+                if (!StartOfRound.Instance.unlockablesList.unlockables[(int)UnlockableUpgrade.LoudHorn].hasBeenUnlockedByPlayer)
+                {
+                    StartOfRound.Instance.BuyShipUnlockableServerRpc((int)UnlockableUpgrade.LoudHorn, Instance.shipTerminal.groupCredits);
+                    StartOfRound.Instance.SyncShipUnlockablesServerRpc();
+                }
+
+                ShipAlarmCord[] shipAlarmCords = UnityEngine.Object.FindObjectsOfType<ShipAlarmCord>();
+                if (shipAlarmCords != null)
+                {
+                    foreach (ShipAlarmCord shipAlarmCord in shipAlarmCords)
+                    {
+                        Debug.Log("ShipAlarmCord found: " + shipAlarmCord.ToString());
+                        shipAlarmCord.PullCordServerRpc(-1);
+                    }
+                }
+                else
+                {
+                    Debug.Log("No ShipAlarmCord objects found.");
+                }
+
+                foreach (var turret in UnityEngine.Object.FindObjectsOfType<Turret>())
+                {
+                    turret.EnterBerserkModeServerRpc(-1);
+                }
+
+                Instance.shipTerminal.PlayTerminalAudioServerRpc(1);
+
+                if (Instance.shipLights)
+                    Instance.shipLights.SetShipLightsServerRpc(!Instance.shipLights.areLightsOn);
+
+                if (Instance.tvScript)
+                {
+                    if (Instance.tvScript.tvOn)
+                        Instance.tvScript.TurnOffTVServerRpc();
+                    else
+                        Instance.tvScript.TurnOnTVServerRpc();
+                }
+
+                foreach (EnemyAI enemy in Instance.enemies)
+                {
+                    if (enemy != null && enemy != Features.Possession.possessedEnemy)
+                    {
+                        enemy.ChangeEnemyOwnerServerRpc(Instance.localPlayer.actualClientId);
+                        foreach (Collider col in enemy.GetComponentsInChildren<Collider>()) col.enabled = false; // To prevent enemies from getting stuck in eachother
+                        enemy.transform.position = Instance.localPlayer.transform.position;
+                        enemy.SyncPositionToClients();
+                    }
+                }
+
+                Dictionary<PlaceableShipObject, Vector3> originalRotations = new Dictionary<PlaceableShipObject, Vector3>();
+
+                foreach (PlaceableShipObject shipObject in GameObjectManager.Instance.shipObjects)
+                {
+                    NetworkObject networkObject = shipObject.parentObject.GetComponent<NetworkObject>();
+                    if (!originalRotations.ContainsKey(shipObject))
+                    {
+                        originalRotations[shipObject] = shipObject.mainMesh.transform.eulerAngles;
+                    }
+
+                    Vector3 shipPosition = shipObject.transform.position;
+                    Vector3 invertedRotation = new Vector3(90, shipObject.transform.eulerAngles.y, shipObject.transform.eulerAngles.z);
+
+                    shipObject.mainMesh.transform.eulerAngles = invertedRotation;
+                    GameObjectManager.Instance.shipBuildModeManager.PlaceShipObject(shipPosition, invertedRotation, shipObject);
+                    GameObjectManager.Instance.shipBuildModeManager.CancelBuildMode(false);
+                    GameObjectManager.Instance.shipBuildModeManager.PlaceShipObjectServerRpc(shipPosition,
+                        invertedRotation,
+                        networkObject,
+                        -1);
+                }
+
+                //foreach (PlaceableShipObject shipObject in GameObjectManager.Instance.shipObjects)
+                //{
+                //    NetworkObject networkObject = shipObject.parentObject.GetComponent<NetworkObject>();
+                //    if (StartOfRound.Instance.unlockablesList.unlockables[shipObject.unlockableID].inStorage)
+                //        StartOfRound.Instance.ReturnUnlockableFromStorageServerRpc(shipObject.unlockableID);
+                //
+                //    GameObjectManager.Instance.shipBuildModeManager.PlaceShipObject(__instance.transform.position,
+                //        __instance.transform.eulerAngles,
+                //        shipObject);
+                //    GameObjectManager.Instance.shipBuildModeManager.CancelBuildMode(false);
+                //    GameObjectManager.Instance.shipBuildModeManager.PlaceShipObjectServerRpc(__instance.transform.position,
+                //        shipObject.mainMesh.transform.eulerAngles,
+                //        networkObject,
+                //        Settings.Instance.b_HideObjects ? (int)__instance.playerClientId : -1);
+                //
+                //
+                }
+
+
             if (settingsData.b_Horn != true)
             {
                 ShipAlarmCord[] shipAlarmCords = UnityEngine.Object.FindObjectsOfType<ShipAlarmCord>();
@@ -1028,7 +1148,8 @@ namespace ProjectApparatus
                 {
                     //Debug.Log("No ShipAlarmCord objects found.");
                 }
-                
+
+                PAUtils.SendChatMessage(settingsData.str_ChatMessage);
             }
 
             if (settingsData.b_AnonChatSpam)

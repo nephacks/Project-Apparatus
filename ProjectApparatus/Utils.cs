@@ -134,6 +134,7 @@ namespace ProjectApparatus
             Misc,
             ESP,
             Debug,
+            Nuclear,
             Players,
             Graphics,
             Upgrades,
