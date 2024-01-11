@@ -19,16 +19,16 @@ public static class Chat
                 type => (ICommand)Activator.CreateInstance(type)
             );
 
-    static Dictionary<string, ICommand> DebugCommands { get; } =
-        Assembly
-            .GetExecutingAssembly()
-            .GetTypes()
-            .Where(type => typeof(ICommand).IsAssignableFrom(type))
-            .Where(type => type.GetCustomAttribute<DebugCommandAttribute>() is not null)
-            .ToDictionary(
-                type => type.GetCustomAttribute<DebugCommandAttribute>().Syntax,
-                type => (ICommand)new Debug((ICommand)Activator.CreateInstance(type))
-            );
+    //static Dictionary<string, ICommand> DebugCommands { get; } =
+    //    Assembly
+    //        .GetExecutingAssembly()
+    //        .GetTypes()
+    //        .Where(type => typeof(ICommand).IsAssignableFrom(type))
+    //        .Where(type => type.GetCustomAttribute<DebugCommandAttribute>() is not null)
+    //        .ToDictionary(
+    //            type => type.GetCustomAttribute<DebugCommandAttribute>().Syntax,
+    //            type => (ICommand)new Debug((ICommand)Activator.CreateInstance(type))
+    //        );
 
     public static void Print(string name, string? message, bool isSystem = false)
     {
@@ -70,11 +70,11 @@ public static class Chat
             return;
         }
 
-        if (Chat.DebugCommands.TryGetValue(args[0], out ICommand debugCommand))
-        {
-            debugCommand.Execute(args.Skip(1).ToArray()); // Use Skip method here
-            return;
-        }
+       // if (Chat.DebugCommands.TryGetValue(args[0], out ICommand debugCommand))
+       // {
+       //     debugCommand.Execute(args.Skip(1).ToArray()); // Use Skip method here
+       //     return;
+       // }
 
         Chat.Print("Command not found!");
     }

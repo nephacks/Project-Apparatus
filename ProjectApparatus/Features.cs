@@ -1,7 +1,9 @@
 ﻿using Dissonance;
 using GameNetcodeStuff;
 using HarmonyLib;
+using System;
 using System.Linq;
+using Hax;
 using System.Windows.Forms;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,6 +13,60 @@ using static ProjectApparatus.Features.Thirdperson;
 
 namespace ProjectApparatus
 {
+
+    public class GameListener : MonoBehaviour
+    {
+        public static event Action onGameStart;
+        public static event Action onGameEnd;
+        public static event Action onShipLand;
+        public static event Action onShipLeave;
+        private bool inGame = false;
+        private bool shipLand = false;
+
+        void Update()
+        {
+            InGameListener();
+            ShipDoorListener();
+        }
+
+        void ShipDoorListener()
+        {
+            if (!Helper.StartOfRound.IsNotNull(out StartOfRound startOfRound)) return;
+
+            if (startOfRound.shipHasLanded && !shipLand)
+            {
+                shipLand = true;
+                onShipLand?.Invoke();
+            }
+            else if (!startOfRound.shipHasLanded && shipLand)
+            {
+                shipLand = false;
+                onShipLeave?.Invoke();
+            }
+        }
+
+        void InGameListener()
+        {
+            bool inGame = Helper.LocalPlayer != null;
+
+            if (this.inGame == inGame)
+            {
+                return;
+            }
+
+            this.inGame = inGame;
+
+            if (this.inGame)
+            {
+                onGameStart?.Invoke();
+            }
+            else
+            {
+                onGameEnd?.Invoke();
+            }
+        }
+    }
+
     public static class Features
     {  
         public class Thirdperson : MonoBehaviour // credits: https://thunderstore.io/c/lethal-company/p/Verity/3rdPerson/
@@ -96,7 +152,7 @@ namespace ProjectApparatus
                     ThirdpersonCamera._camera.nearClipPlane = 0.1f;
                     ThirdpersonCamera._camera.cullingMask = 557520895;
                     ThirdpersonCamera._camera.enabled = false;
-                    Object.DontDestroyOnLoad(ThirdpersonCamera._camera);
+                    UnityEngine.Object.DontDestroyOnLoad(ThirdpersonCamera._camera);
                 }
 
                 private void Update()

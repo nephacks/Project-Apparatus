@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+	<LangVersion>preview</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -30,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+	<LangVersion>preview</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -37,7 +39,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>preview</LangVersion>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
@@ -46,7 +48,7 @@
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>preview</LangVersion>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <PropertyGroup>
@@ -69,6 +71,142 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resource1.resx</DependentUpon>
     </Compile>
+    <Compile Include="Scripts\Attributes\CommandAttribute.cs" />
+    <Compile Include="Scripts\Attributes\DebugCommandAttribute.cs" />
+    <Compile Include="Scripts\Commands\BerserkCommand.cs" />
+    <Compile Include="Scripts\Commands\BetaCommand.cs" />
+    <Compile Include="Scripts\Commands\BlockCommand.cs" />
+    <Compile Include="Scripts\Commands\BuildCommand.cs" />
+    <Compile Include="Scripts\Commands\ChibakuTenseiCommand.cs" />
+    <Compile Include="Scripts\Commands\CloseCommand.cs" />
+    <Compile Include="Scripts\Commands\DemigodCommand.cs" />
+    <Compile Include="Scripts\Commands\EndCommand.cs" />
+    <Compile Include="Scripts\Commands\EnterCommand.cs" />
+    <Compile Include="Scripts\Commands\ExitCommand.cs" />
+    <Compile Include="Scripts\Commands\ExperienceCommand.cs" />
+    <Compile Include="Scripts\Commands\ExplodeCommand.cs" />
+    <Compile Include="Scripts\Commands\FatalityCommand.cs" />
+    <Compile Include="Scripts\Commands\GarageCommand.cs" />
+    <Compile Include="Scripts\Commands\GodCommand.cs" />
+    <Compile Include="Scripts\Commands\GrabCommand.cs" />
+    <Compile Include="Scripts\Commands\Hate\HateCommand.cs" />
+    <Compile Include="Scripts\Commands\Hate\MobCommand.cs" />
+    <Compile Include="Scripts\Commands\HealCommand.cs" />
+    <Compile Include="Scripts\Commands\HornCommand.cs" />
+    <Compile Include="Scripts\Commands\ICommand.cs" />
+    <Compile Include="Scripts\Commands\InvisibleCommand.cs" />
+    <Compile Include="Scripts\Commands\KillCommand.cs" />
+    <Compile Include="Scripts\Commands\LocationCommand.cs" />
+    <Compile Include="Scripts\Commands\LockCommand.cs" />
+    <Compile Include="Scripts\Commands\MaskCommand.cs" />
+    <Compile Include="Scripts\Commands\MoneyCommand.cs" />
+    <Compile Include="Scripts\Commands\NoiseCommand.cs" />
+    <Compile Include="Scripts\Commands\OpenCommand.cs" />
+    <Compile Include="Scripts\Commands\PlayersCommand.cs" />
+    <Compile Include="Scripts\Commands\PoisonCommand.cs" />
+    <Compile Include="Scripts\Commands\PumpkinCommand.cs" />
+    <Compile Include="Scripts\Commands\RandomCommand.cs" />
+    <Compile Include="Scripts\Commands\RapidCommand.cs" />
+    <Compile Include="Scripts\Commands\SayCommand.cs" />
+    <Compile Include="Scripts\Commands\ShovelCommand.cs" />
+    <Compile Include="Scripts\Commands\SignalCommand.cs" />
+    <Compile Include="Scripts\Commands\StartCommand.cs" />
+    <Compile Include="Scripts\Commands\StunCommand.cs" />
+    <Compile Include="Scripts\Commands\StunOnClickCommand.cs" />
+    <Compile Include="Scripts\Commands\Teleporter\HomeCommand.cs" />
+    <Compile Include="Scripts\Commands\Teleporter\TeleportCommand.cs" />
+    <Compile Include="Scripts\Commands\Teleporter\VoidCommand.cs" />
+    <Compile Include="Scripts\Commands\UnlockCommand.cs" />
+    <Compile Include="Scripts\Commands\VisitCommand.cs" />
+    <Compile Include="Scripts\Components\KeyboardMovement.cs" />
+    <Compile Include="Scripts\Components\MousePan.cs" />
+    <Compile Include="Scripts\Components\RigidbodyMovement.cs" />
+    <Compile Include="Scripts\Components\TransientBehaviour.cs" />
+    <Compile Include="Scripts\Components\WaitForBehaviour.cs" />
+    <Compile Include="Scripts\Core\GameListener.cs" />
+    <Compile Include="Scripts\Core\HaxObjects.cs" />
+    <Compile Include="Scripts\Core\InputListener.cs" />
+    <Compile Include="Scripts\Core\ScreenListener.cs" />
+    <Compile Include="Scripts\Enums\Level.cs" />
+    <Compile Include="Scripts\Enums\Unlockable.cs" />
+    <Compile Include="Scripts\Extensions\Copy.cs" />
+    <Compile Include="Scripts\Extensions\First.cs" />
+    <Compile Include="Scripts\Extensions\ForEach.cs" />
+    <Compile Include="Scripts\Extensions\IsNotNull.cs" />
+    <Compile Include="Scripts\Extensions\Range.cs" />
+    <Compile Include="Scripts\Extensions\StartResilientCoroutine.cs" />
+    <Compile Include="Scripts\Extensions\Unfake.cs" />
+    <Compile Include="Scripts\Helpers\Camera.cs" />
+    <Compile Include="Scripts\Helpers\CreateComponent.cs" />
+    <Compile Include="Scripts\Helpers\FindObjects.cs" />
+    <Compile Include="Scripts\Helpers\GUI.cs" />
+    <Compile Include="Scripts\Helpers\Landmine.cs" />
+    <Compile Include="Scripts\Helpers\Managers.cs" />
+    <Compile Include="Scripts\Helpers\Map.cs" />
+    <Compile Include="Scripts\Helpers\PlaceObject.cs" />
+    <Compile Include="Scripts\Helpers\Players.cs" />
+    <Compile Include="Scripts\Helpers\Screen.cs" />
+    <Compile Include="Scripts\Helpers\ShipDoor.cs" />
+    <Compile Include="Scripts\Helpers\SphereCast.cs" />
+    <Compile Include="Scripts\Helpers\Teleporter.cs" />
+    <Compile Include="Scripts\Helpers\Terminal.cs" />
+    <Compile Include="Scripts\Helpers\Try.cs" />
+    <Compile Include="Scripts\Helpers\Unlockable.cs" />
+    <Compile Include="Scripts\Mixins\IEnemyPrompter.cs" />
+    <Compile Include="Scripts\Mixins\IEntrance.cs" />
+    <Compile Include="Scripts\Mixins\IStun.cs" />
+    <Compile Include="Scripts\Mixins\ITeleporter.cs" />
+    <Compile Include="Scripts\Modules\AntiKickMod.cs" />
+    <Compile Include="Scripts\Modules\ClearVisionMod.cs" />
+    <Compile Include="Scripts\Modules\CrosshairMod.cs" />
+    <Compile Include="Scripts\Modules\ESPMod.cs" />
+    <Compile Include="Scripts\Modules\FollowMod.cs" />
+    <Compile Include="Scripts\Modules\InstantInteractMod.cs" />
+    <Compile Include="Scripts\Modules\MinimalGUIMod.cs" />
+    <Compile Include="Scripts\Modules\PhantomMod.cs" />
+    <Compile Include="Scripts\Modules\PossessionMod.cs" />
+    <Compile Include="Scripts\Modules\SaneMod.cs" />
+    <Compile Include="Scripts\Modules\StaminaMod.cs" />
+    <Compile Include="Scripts\Modules\StunMod.cs" />
+    <Compile Include="Scripts\Modules\TriggerMod.cs" />
+    <Compile Include="Scripts\Modules\WeightMod.cs" />
+    <Compile Include="Scripts\Patches\AntiKickPatch.cs" />
+    <Compile Include="Scripts\Patches\BuildAnywherePatch.cs" />
+    <Compile Include="Scripts\Patches\ChatPatch.cs" />
+    <Compile Include="Scripts\Patches\CreditsPatch.cs" />
+    <Compile Include="Scripts\Patches\DemigodModePatch.cs" />
+    <Compile Include="Scripts\Patches\EnemyPatch.cs" />
+    <Compile Include="Scripts\Patches\GodModePatch.cs" />
+    <Compile Include="Scripts\Patches\HUDPatch.cs" />
+    <Compile Include="Scripts\Patches\InfiniteAmmoPatch.cs" />
+    <Compile Include="Scripts\Patches\InfiniteBatteryPatch.cs" />
+    <Compile Include="Scripts\Patches\InfiniteGrabPatch.cs" />
+    <Compile Include="Scripts\Patches\InfiniteItemUsagePatch.cs" />
+    <Compile Include="Scripts\Patches\InfiniteScanRangePatch.cs" />
+    <Compile Include="Scripts\Patches\InvisiblePatch.cs" />
+    <Compile Include="Scripts\Patches\LobbyPatch.cs" />
+    <Compile Include="Scripts\Patches\NameBillboardPatch.cs" />
+    <Compile Include="Scripts\Patches\NoCooldownPatch.cs" />
+    <Compile Include="Scripts\Patches\NoFallDamagePatch.cs" />
+    <Compile Include="Scripts\Patches\OneHandedItemPatch.cs" />
+    <Compile Include="Scripts\Patches\RadarPatch.cs" />
+    <Compile Include="Scripts\Patches\ShotgunPatch.cs" />
+    <Compile Include="Scripts\Patches\ShovelPatch.cs" />
+    <Compile Include="Scripts\Patches\TeleportWithItemsPatch.cs" />
+    <Compile Include="Scripts\Patches\TimeOutPatch.cs" />
+    <Compile Include="Scripts\Patches\UntargetablePatch.cs" />
+    <Compile Include="Scripts\Patches\WaitForShipPatch.cs" />
+    <Compile Include="Scripts\Patches\ZapGunPatch.cs" />
+    <Compile Include="Scripts\Static\Chat.cs" />
+    <Compile Include="Scripts\Static\Logger.cs" />
+    <Compile Include="Scripts\Static\Setting.cs" />
+    <Compile Include="Scripts\Structures\ObjectPlacement.cs" />
+    <Compile Include="Scripts\Structures\RendererPair.cs" />
+    <Compile Include="Scripts\Structures\Result.cs" />
+    <Compile Include="Scripts\Structures\Size.cs" />
+    <Compile Include="Scripts\Utils\MultiObjectPool.cs" />
+    <Compile Include="Scripts\Utils\Reflector.cs" />
+    <Compile Include="Scripts\Utils\SingleObjectPool..cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

@@ -19,15 +19,31 @@ using UnityEngine.Video;
 using UnityEngine.Rendering.HighDefinition;
 using static IngamePlayerSettings;
 using static UnityEngine.Rendering.DebugUI;
+using Hax;
+
 namespace ProjectApparatus
 {
+
+    [HarmonyPatch(typeof(ManualCameraRenderer), nameof(ManualCameraRenderer.SwitchRadarTargetClientRpc))]
+    class AntiRadar
+    {
+        static bool Prefix(ManualCameraRenderer __instance, int switchToIndex)
+        {
+            if (!Settings.Instance.settingsData.b_AntiRadar) return true;
+            if (Helper.LocalPlayer?.playerClientId != (ulong)switchToIndex) return true;
+
+            __instance.SwitchRadarTargetForward(true);
+
+            return false;
+        }
+    }
 
     [HarmonyPatch(typeof(PlayerControllerB), "SendNewPlayerValuesServerRpc")]
     public class AntiKickPatch
     {
         static bool Prefix(PlayerControllerB __instance)
         {
-            if (Settings.AntiKick) return true;
+            if (!Settings.AntiKick) return true;
 
             ulong[] playerSteamIds = new ulong[__instance.playersManager.allPlayerScripts.Length];
 
@@ -233,7 +249,7 @@ namespace ProjectApparatus
             else
                 __instance.jumpForce = Settings.Instance.settingsData.b_JumpHeight ? Settings.Instance.settingsData.i_JumpHeight : ojumpForce;
 
-            if (__instance.nightVision)
+            if (__instance.nightVision != null)
             {
                 /* I see a lot of cheats set nightVision.enabled to false when the feature is off, this is wrong as the game sets it to true when you're in-doors. 
                    Also there's no reason to reset it as the game automatically sets it back every time Update is called. */
