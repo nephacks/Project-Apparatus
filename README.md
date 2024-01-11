@@ -10,6 +10,13 @@ These are
 - **Lower experimentation garage door:** Lowers the garage door by a tiny bit, can be clicked multiple times to fully close.
 
 
+Features courtesy of [realbillie](https://github.com/realbillie):
+- **AntiKick**
+- **AntiRadar**
+- **LC-Hax Commands**
+- and probably some other things i forgot about...
+
+
 # Original README
 
 # Project by waxxyTF2, UrbanaJoker & Toaaa - [UC Thread](https://www.unknowncheats.me/forum/other-fps-games/616587-project-apparatus-lethal-company-cheat.html)
