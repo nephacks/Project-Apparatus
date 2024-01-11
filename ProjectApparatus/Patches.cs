@@ -20,9 +20,36 @@ using UnityEngine.Rendering.HighDefinition;
 using static IngamePlayerSettings;
 using static UnityEngine.Rendering.DebugUI;
 using Hax;
+using System.Collections;
 
 namespace ProjectApparatus
 {
+    [HarmonyPatch(typeof(StartOfRound), "EndOfGame")]
+    class WaitForShipPatch
+    {
+        static IEnumerator Postfix(IEnumerator endOfGame)
+        {
+            while (endOfGame.MoveNext()) yield return endOfGame.Current;
+            yield return new WaitUntil(() => Helper.StartOfRound?.shipIsLeaving is false);
+            yield return new WaitForSeconds(5.0f); // Wait a bit to give it a chance to fix itself
+            bool isLeverBroken = true;
+
+            while (isLeverBroken)
+            {
+                yield return new WaitForSeconds(UnityEngine.Random.Range(2.0f, 5.0f)); // Make lc-hax users not send it all at the same time
+                if (Helper.StartOfRound?.travellingToNewLevel is true) continue;
+
+                isLeverBroken =
+                    Helper.StartOfRound?.inShipPhase is true &&
+                    Helper.FindObject<StartMatchLever>()?.triggerScript.interactable is false;
+
+                if (isLeverBroken)
+                {
+                    Helper.StartOfRound?.PlayerHasRevivedServerRpc();
+                }
+            }
+        }
+    }
 
     [HarmonyPatch(typeof(ManualCameraRenderer), nameof(ManualCameraRenderer.SwitchRadarTargetClientRpc))]
     class AntiRadar
@@ -433,14 +460,25 @@ namespace ProjectApparatus
         }
     }
 
-    [HarmonyPatch(typeof(GrabbableObject), "DestroyObjectInHand")]
-    public class GrabbableObject_DestroyObjectInHand_Patch
+    [HarmonyPatch(typeof(GiftBoxItem), nameof(GiftBoxItem.ItemActivate))]
+    class GiftBoxPatch
     {
-        public static bool Prefix(GiftBoxItem __instance)
+        static void Prefix(ref bool used, ref bool ___hasUsedGift)
         {
-            return !Settings.Instance.settingsData.b_InfiniteItems;
+            used = false;
+            ___hasUsedGift = false;
         }
     }
+
+    //[HarmonyPatch(typeof(GiftBoxItem), nameof(GiftBoxItem.ItemActivate))]
+    //class GiftBoxPatch
+    //{
+    //    static void Prefix(ref bool used, ref bool ___hasUsedGift)
+    //    {
+    //        used = false;
+    //        ___hasUsedGift = false;
+    //    }
+    //}
 
     [HarmonyPatch(typeof(InteractTrigger), "Interact")]
     public class InteractTrigger_Interact_Patch

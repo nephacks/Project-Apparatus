@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Hax;
 using Steamworks;
 using GameNetcodeStuff;
 using HarmonyLib;
@@ -11,9 +12,10 @@ using System.Windows.Forms;
 using Unity.Netcode;
 using System.IO;
 using UnityEngine.ProBuilder.Shapes;
-//using Hax;
 using static UnityEngine.GraphicsBuffer;
 using Steamworks.Data;
+using UnityEngine.UIElements;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace ProjectApparatus
 {
@@ -29,6 +31,7 @@ namespace ProjectApparatus
                     !plyer.disconnectedMidGame &&
                     !plyer.playerUsername.Contains("Player #"));
         }
+
 
         public void OnGUI()
         {
@@ -210,6 +213,7 @@ namespace ProjectApparatus
                 UI.Checkbox(ref settingsData.b_AntiKick, "AntiKick", "Cannot be kicked from the game.");
                 UI.Checkbox(ref settingsData.b_LandShip, "Land Ship Spam", "Tries to land ship as soon as possible.");
                 UI.Checkbox(ref settingsData.b_AntiRadar, "AntiRadar", "Prevents you from ship spectators.");
+                //UI.Checkbox(ref settingsData.b_RapidFire, "RapidFire", "Prevents you from ship spectators.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
@@ -531,15 +535,38 @@ namespace ProjectApparatus
                             }
                         });
 
-                       // UI.Button("Spawn Mimic", ".", () =>
-                       // {
-                       //     foreach (HauntedMaskItem maskItem in yourCollection) // Replace 'yourCollection' with the actual collection name
-                       //     {
-                       //         maskItem.ChangeOwnershipOfProp(GameNetworkManager.Instance.localPlayerController.actualClientId);
-                       //         bool inFactory = maskItem.transform.position.y < global::LethalMenu.LethalMenu.shipDoor.transform.position.y - 10f;
-                       //         maskItem.CreateMimicServerRpc(inFactory, maskItem.transform.position);
-                       //     }
-                       // });
+                        UI.Button("Spawn Mimic", "Spawn Mimic.", () =>
+                        {
+                            HauntedMaskItem hauntedMaskItem = Helper.LocalPlayer?.currentlyHeldObjectServer as HauntedMaskItem;
+                            hauntedMaskItem.CreateMimicServerRpc(selectedPlayer.isInsideFactory, selectedPlayer.transform.position);
+                        });
+
+
+
+
+                        UI.Button("Spawn Spider Web", "Spawn Spider Web.", () =>
+                        {
+                            SandSpiderAI spiderr = UnityEngine.Object.FindObjectOfType(typeof(SandSpiderAI)) as SandSpiderAI;
+                            int count = 1;
+                            
+                        
+                            if (spiderr == null) return;
+                        
+                            for (int i = 0; i < count; i++)
+                            {
+                                spiderr.SpawnWeb(selectedPlayer.transform.position);
+                            }
+                        });
+
+                        // UI.Button("Spawn Mimic", ".", () =>
+                        // {
+                        //     foreach (HauntedMaskItem maskItem in yourCollection) // Replace 'yourCollection' with the actual collection name
+                        //     {
+                        //         maskItem.ChangeOwnershipOfProp(GameNetworkManager.Instance.localPlayerController.actualClientId);
+                        //         bool inFactory = maskItem.transform.position.y < global::LethalMenu.LethalMenu.shipDoor.transform.position.y - 10f;
+                        //         maskItem.CreateMimicServerRpc(inFactory, maskItem.transform.position);
+                        //     }
+                        // });
 
 
 
@@ -1175,6 +1202,11 @@ namespace ProjectApparatus
                 //
                 }
 
+            if (settingsData.b_BetaBadge)
+            {
+                bool playedDuringBeta = ES3.Load<bool>("playedDuringBeta", "LCGeneralSaveData", true);
+                ES3.Save("playedDuringBeta", !playedDuringBeta, "LCGeneralSaveData");
+            }
 
             if (settingsData.b_Horn != true)
             {
@@ -1194,6 +1226,29 @@ namespace ProjectApparatus
                 }
 
                 //PAUtils.SendChatMessage(settingsData.str_ChatMessage);
+            }
+
+            if (settingsData.b_PlushieSpam)
+            {
+                if (!StartOfRound.Instance.unlockablesList.unlockables[(int)UnlockableUpgrade.LoudHorn].hasBeenUnlockedByPlayer)
+                {
+                    StartOfRound.Instance.BuyShipUnlockableServerRpc((int)UnlockableUpgrade.LoudHorn, Instance.shipTerminal.groupCredits);
+                    StartOfRound.Instance.SyncShipUnlockablesServerRpc();
+                }
+
+                ShipAlarmCord[] shipAlarmCords = UnityEngine.Object.FindObjectsOfType<ShipAlarmCord>();
+                if (shipAlarmCords != null)
+                {
+                    foreach (ShipAlarmCord shipAlarmCord in shipAlarmCords)
+                    {
+                        Debug.Log("ShipAlarmCord found: " + shipAlarmCord.ToString());
+                        shipAlarmCord.PullCordServerRpc(-1);
+                    }
+                }
+                else
+                {
+                    Debug.Log("No ShipAlarmCord objects found.");
+                }
             }
 
             if (settingsData.b_AnonChatSpam)
