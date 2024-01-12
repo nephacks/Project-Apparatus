@@ -86,7 +86,8 @@ namespace ProjectApparatus
         public bool b_NUCLEAR;
         public bool b_AntiRadar;
         public bool b_PlushieSpam;
-        public bool b_MimicNuclear;
+        //public bool b_MimicNuclear;
+        public bool b_CloseShip;
         public static bool AntiKick { get; internal set; }
         public string str_FakeDisconnect = "Enter name";
 

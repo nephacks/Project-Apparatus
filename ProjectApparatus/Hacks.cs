@@ -16,12 +16,15 @@ using static UnityEngine.GraphicsBuffer;
 using Steamworks.Data;
 using UnityEngine.UIElements;
 using static UnityEngine.EventSystems.EventTrigger;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+
 
 namespace ProjectApparatus
 {
 
     internal class Hacks : MonoBehaviour
     {
+        public HangarShipDoor shipDoor;
         private static GUIStyle Style = null;
         private readonly SettingsData settingsData = Settings.Instance.settingsData;
 
@@ -35,6 +38,7 @@ namespace ProjectApparatus
 
         public void OnGUI()
         {
+
             if (!Settings.Instance.b_isMenuOpen && Event.current.type != EventType.Repaint)
                 return;
 
@@ -212,7 +216,7 @@ namespace ProjectApparatus
                 UI.Checkbox(ref settingsData.b_Invisibility, "Invisibility", "Players will not be able to see you.");
                 UI.Checkbox(ref settingsData.b_AntiKick, "AntiKick", "Cannot be kicked from the game.");
                 UI.Checkbox(ref settingsData.b_LandShip, "Land Ship Spam", "Tries to land ship as soon as possible.");
-                UI.Checkbox(ref settingsData.b_AntiRadar, "AntiRadar", "Prevents you from ship spectators.");
+                UI.Checkbox(ref settingsData.b_CloseShip, "Close Ship Door Spam", "spams ship door shut");
                 //UI.Checkbox(ref settingsData.b_RapidFire, "RapidFire", "Prevents you from ship spectators.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
@@ -313,6 +317,14 @@ namespace ProjectApparatus
                     StartOfRound.Instance.companyBuyingRate = 0.0f;
 
                     StartOfRound.Instance.SyncCompanyBuyingRateServerRpc(); // startofround
+                });
+
+                UI.Button("close ship door", "2", () =>
+                {
+                    Helper.CloseShipDoor(true);
+                    //shipDoor = UnityEngine.Object.FindObjectOfType<HangarShipDoor>();
+                    //shipDoor.SetDoorClosed();
+                    //localplayer.playersManager.SetShipDoorsClosed(true);
                 });
 
                 UI.Button("submit leaderboard score hack,", "start challenge moon, land ship, click, start ship and quit.", () =>
@@ -1250,27 +1262,32 @@ namespace ProjectApparatus
                 hauntedMaskItem.CreateMimicServerRpc(Instance.localPlayer.isInsideFactory, mimicSpam);
             }
 
-            if (settingsData.b_PlushieSpam)
-            {
-                if (!StartOfRound.Instance.unlockablesList.unlockables[(int)UnlockableUpgrade.LoudHorn].hasBeenUnlockedByPlayer)
-                {
-                    StartOfRound.Instance.BuyShipUnlockableServerRpc((int)UnlockableUpgrade.LoudHorn, Instance.shipTerminal.groupCredits);
-                    StartOfRound.Instance.SyncShipUnlockablesServerRpc();
-                }
+            //if (settingsData.b_PlushieSpam)
+            //{
+            //    if (!StartOfRound.Instance.unlockablesList.unlockables[(int)UnlockableUpgrade.LoudHorn].hasBeenUnlockedByPlayer)
+            //    {
+            //        StartOfRound.Instance.BuyShipUnlockableServerRpc((int)UnlockableUpgrade.LoudHorn, Instance.shipTerminal.groupCredits);
+            //        StartOfRound.Instance.SyncShipUnlockablesServerRpc();
+            //    }
+            //
+            //    ShipAlarmCord[] shipAlarmCords = UnityEngine.Object.FindObjectsOfType<ShipAlarmCord>();
+            //    if (shipAlarmCords != null)
+            //    {
+            //        foreach (ShipAlarmCord shipAlarmCord in shipAlarmCords)
+            //        {
+            //            Debug.Log("ShipAlarmCord found: " + shipAlarmCord.ToString());
+            //            shipAlarmCord.PullCordServerRpc(-1);
+            //        }
+            //    }
+            //    else
+            //    {
+            //        Debug.Log("No ShipAlarmCord objects found.");
+            //    }
+            //}
 
-                ShipAlarmCord[] shipAlarmCords = UnityEngine.Object.FindObjectsOfType<ShipAlarmCord>();
-                if (shipAlarmCords != null)
-                {
-                    foreach (ShipAlarmCord shipAlarmCord in shipAlarmCords)
-                    {
-                        Debug.Log("ShipAlarmCord found: " + shipAlarmCord.ToString());
-                        shipAlarmCord.PullCordServerRpc(-1);
-                    }
-                }
-                else
-                {
-                    Debug.Log("No ShipAlarmCord objects found.");
-                }
+            if (settingsData.b_CloseShip)
+            {
+                Helper.CloseShipDoor(true);
             }
 
             if (settingsData.b_AnonChatSpam)
