@@ -301,12 +301,12 @@ namespace ProjectApparatus
                 });
 
 
-                UI.Button("more scrap", "seems to work not being host either, not sure if clientsided items.", () =>
+                UI.Button("more scrap (host)", "", () =>
                 {
                     RoundManager.Instance.SpawnScrapInLevel();
                 });
 
-                UI.Button("buying rate", "2", () =>
+                UI.Button("buying rate (host)", "2", () =>
                 {
                     //float companyBuyingRate = 1f;
                     //companyBuyingRate = buyingRate;
@@ -346,7 +346,7 @@ namespace ProjectApparatus
                 settingsData.str_FakeDisconnect = GUILayout.TextField(settingsData.str_FakeDisconnect, Array.Empty<GUILayoutOption>());
                 UI.Button("Send fake disconnect message", "Anonymously sends a message in chat.", () =>
                 {
-                    PAUtils.SendChatMessage(settingsData.str_FakeDisconnect + " disconnected");
+                    PAUtils.SendChatMessage(settingsData.str_FakeDisconnect + " disconnected.");
                 });
 
 
