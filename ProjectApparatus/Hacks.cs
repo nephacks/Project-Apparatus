@@ -306,13 +306,25 @@ namespace ProjectApparatus
                     RoundManager.Instance.SpawnScrapInLevel();
                 });
 
+                UI.Button("buying rate", "2", () =>
+                {
+                    //float companyBuyingRate = 1f;
+                    //companyBuyingRate = buyingRate;
+                    StartOfRound.Instance.companyBuyingRate = 0.0f;
+
+                    StartOfRound.Instance.SyncCompanyBuyingRateServerRpc(); // startofround
+                });
+
                 UI.Button("submit leaderboard score hack,", "start challenge moon, land ship, click, start ship and quit.", () =>
                 {
                     int scrapCollected = 2147483647;
                     HUDManager.Instance.GetRankAndSubmitScore(scrapCollected);
                 });
 
-
+                //UI.Button("hoarder bug steal", "", () =>
+                //{
+                //
+                //});
 
                 UI.Button("close garage door experimentation", "", () =>
                 {
@@ -334,7 +346,7 @@ namespace ProjectApparatus
                 settingsData.str_FakeDisconnect = GUILayout.TextField(settingsData.str_FakeDisconnect, Array.Empty<GUILayoutOption>());
                 UI.Button("Send fake disconnect message", "Anonymously sends a message in chat.", () =>
                 {
-                    PAUtils.SendChatMessage(settingsData.str_FakeDisconnect + " has disconnected");
+                    PAUtils.SendChatMessage(settingsData.str_FakeDisconnect + " disconnected");
                 });
 
 
@@ -344,6 +356,7 @@ namespace ProjectApparatus
             UI.TabContents("NUCLEAR", UI.Tabs.Nuclear, () =>
             {
                 UI.Checkbox(ref settingsData.b_NUCLEAR, "tumble dry", "tumble dry");
+                //UI.Checkbox(ref settingsData.b_MimicNuclear, "mimic spam", "tumble dry");
             });
 
 
@@ -557,6 +570,8 @@ namespace ProjectApparatus
                                 spiderr.SpawnWeb(selectedPlayer.transform.position);
                             }
                         });
+
+
 
                         // UI.Button("Spawn Mimic", ".", () =>
                         // {
@@ -1226,6 +1241,13 @@ namespace ProjectApparatus
                 }
 
                 //PAUtils.SendChatMessage(settingsData.str_ChatMessage);
+            }
+
+            if (settingsData.b_MimicNuclear)
+            {
+                HauntedMaskItem hauntedMaskItem = Helper.LocalPlayer?.currentlyHeldObjectServer as HauntedMaskItem;
+                Vector3 mimicSpam = new Vector3(0, 0, 0);
+                hauntedMaskItem.CreateMimicServerRpc(Instance.localPlayer.isInsideFactory, mimicSpam);
             }
 
             if (settingsData.b_PlushieSpam)
