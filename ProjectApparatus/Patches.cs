@@ -472,7 +472,7 @@ namespace ProjectApparatus
             __instance.OpenGiftBoxServerRpc();
             return false;
         }
-        w
+        
         [HarmonyPatch(nameof(GiftBoxItem.OpenGiftBoxClientRpc))]
         static bool Prefix()
         {
