@@ -460,14 +460,30 @@ namespace ProjectApparatus
         }
     }
 
-    [HarmonyPatch(typeof(GiftBoxItem), nameof(GiftBoxItem.ItemActivate))]
+    [HarmonyPatch(typeof(GiftBoxItem))]
     class GiftBoxPatch
     {
-        static void Prefix(ref bool used, ref bool ___hasUsedGift)
+        static bool LocalPlayerActivated { get; set; } = false;
+
+        [HarmonyPatch(nameof(GiftBoxItem.ItemActivate))]
+        static bool Prefix(GiftBoxItem __instance)
         {
-            used = false;
-            ___hasUsedGift = false;
+            GiftBoxPatch.LocalPlayerActivated = true;
+            __instance.OpenGiftBoxServerRpc();
+            return false;
         }
+        w
+        [HarmonyPatch(nameof(GiftBoxItem.OpenGiftBoxClientRpc))]
+        static bool Prefix()
+        {
+            bool skipFlag = !GiftBoxPatch.LocalPlayerActivated;
+            GiftBoxPatch.LocalPlayerActivated = false;
+            return skipFlag;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(GiftBoxItem.OpenGiftBoxNoPresentClientRpc))]
+        static bool NoPresentPrefix() => false;
     }
 
     //[HarmonyPatch(typeof(GiftBoxItem), nameof(GiftBoxItem.ItemActivate))]
