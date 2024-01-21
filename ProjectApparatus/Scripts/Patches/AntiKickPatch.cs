@@ -5,7 +5,6 @@ using HarmonyLib;
 using Steamworks;
 using Hax;
 using System.Collections.Generic;
-using GameNetcodeStuff;
 using System;
 using UnityEngine;
 

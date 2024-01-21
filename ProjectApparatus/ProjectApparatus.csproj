@@ -60,6 +60,8 @@
   <ItemGroup>
     <Compile Include="Features.cs" />
     <Compile Include="FileName.cs" />
+    <Compile Include="FileName2.cs" />
+    <Compile Include="FileName3.cs" />
     <Compile Include="GameObjectManager.cs" />
     <Compile Include="Hacks.cs" />
     <Compile Include="Leaderboard.cs" />
@@ -342,9 +344,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Resources\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.ShaderResourcesrary">
-      <HintPath>Resources\Unity.RenderPipelines.Core.ShaderResourcesrary.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.RenderPipelines.HighDefinition.Config.Runtime, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Resources\Unity.RenderPipelines.HighDefinition.Config.Runtime.dll</HintPath>
@@ -352,9 +351,6 @@
     <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Resources\Unity.RenderPipelines.HighDefinition.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphResourcesrary">
-      <HintPath>Resources\Unity.RenderPipelines.ShaderGraph.ShaderGraphResourcesrary.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Services.Authentication">
       <HintPath>Resources\Unity.Services.Authentication.dll</HintPath>

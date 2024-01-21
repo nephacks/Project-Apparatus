@@ -10,7 +10,7 @@ namespace ProjectApparatus
     [System.Serializable]
     public class SettingsData
     {
-        public readonly string version = "1.02";
+        public readonly string version = "1.03";
 
         /* ESP */
         public bool b_EnableESP;
@@ -88,6 +88,8 @@ namespace ProjectApparatus
         public bool b_PlushieSpam;
         //public bool b_MimicNuclear;
         public bool b_CloseShip;
+        public bool b_OpenShip;
+        public bool b_Chomper;
         public static bool AntiKick { get; internal set; }
         public string str_FakeDisconnect = "Enter name";
 

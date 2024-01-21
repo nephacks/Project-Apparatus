@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using Hax;
+using System.Threading;
 using Steamworks;
 using GameNetcodeStuff;
 using HarmonyLib;
@@ -17,6 +19,7 @@ using Steamworks.Data;
 using UnityEngine.UIElements;
 using static UnityEngine.EventSystems.EventTrigger;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+using UnityEngine.UI;
 
 
 namespace ProjectApparatus
@@ -24,7 +27,11 @@ namespace ProjectApparatus
 
     internal class Hacks : MonoBehaviour
     {
-        public HangarShipDoor shipDoor;
+
+
+        public bool outside;
+        public EnemyType type;
+        //public HangarShipDoor shipDoor;
         private static GUIStyle Style = null;
         private readonly SettingsData settingsData = Settings.Instance.settingsData;
 
@@ -108,6 +115,79 @@ namespace ProjectApparatus
         }
 
         private PlayerControllerB selectedPlayer = null;
+
+        public enum MapObject
+        {
+            TurretContainer,
+            Landmine
+        }
+
+        public static List<SpawnableMapObject> GetSpawnableMapObjects()
+        {
+            List<SpawnableMapObject> types = new List<SpawnableMapObject>();
+
+            if (!(bool)StartOfRound.Instance) return types;
+
+            foreach (var level in StartOfRound.Instance.levels)
+            {
+                level.spawnableMapObjects.ToList().ForEach(o => { if (!types.Any(x => x.prefabToSpawn.name == o.prefabToSpawn.name)) types.Add(o); });
+            }
+        
+            return types;
+        }
+        public static void SpawnMapObjects(MapObject type)
+        {
+            RandomMapObject[] randomObjects = UnityEngine.Object.FindObjectsOfType<RandomMapObject>();
+
+            SpawnableMapObject spawnable = GetSpawnableMapObjects().FirstOrDefault(o => o.prefabToSpawn.name == type.ToString());
+
+            int num =  UnityEngine.Random.Range(5, 15);
+
+            Debug.LogError("Spawning " + num + " " + spawnable.prefabToSpawn.name);
+
+
+            for (int i = 0; i < num; i++)
+            {
+                var node = RoundManager.Instance.insideAINodes[UnityEngine.Random.Range(0, RoundManager.Instance.insideAINodes.Length)];
+
+                Vector3 pos = RoundManager.Instance.GetRandomNavMeshPositionInRadius(node.transform.position, 30);
+                GameObject gameObject =    UnityEngine.Object.Instantiate<GameObject>(spawnable.prefabToSpawn, pos, Quaternion.identity, RoundManager.Instance.mapPropsContainer.transform);
+                gameObject.transform.eulerAngles = !spawnable.spawnFacingAwayFromWall ? new Vector3(gameObject.transform.eulerAngles.x, (float)RoundManager.Instance.AnomalyRandom.Next(0, 360), gameObject.transform.eulerAngles.z) : new Vector3(0.0f, RoundManager.Instance.YRotationThatFacesTheFarthestFromPosition(pos + Vector3.up * 0.2f), 0.0f);
+                gameObject.GetComponent<NetworkObject>().Spawn(true);
+            }
+        }
+
+        //public static void SpawnEnemy(EnemyType type, int num, bool outside)
+        //{
+        //    SelectableLevel level = StartOfRound.Instance.currentLevel;
+        //    PlayerControllerB player = GameNetworkManager.Instance.localPlayerController;
+        //
+        //    level.maxEnemyPowerCount = Int32.MaxValue;
+        //
+        //    var nodes = outside ? RoundManager.Instance.outsideAINodes : RoundManager.Instance.insideAINodes;
+        //
+        //    for (int i = 0; i < num; i++)
+        //    {
+        //        var node = nodes[UnityEngine.Random.Range(0, nodes.Length)];
+        //        RoundManager.Instance.SpawnEnemyGameObject(node.transform.position, 0.0f, -1, type);
+        //    }
+        //}
+
+        //public static List<EnemyType> GetEnemyTypes()
+        //{
+        //    List<EnemyType> types = new List<EnemyType>();
+        //
+        //    if (!(bool)StartOfRound.Instance) return types;
+        //
+        //    foreach (var item in StartOfRound.Instance.levels)
+        //    {
+        //        item.Enemies.ForEach(enemy => { if (!types.Contains(enemy.enemyType)) types.Add(enemy.enemyType); });
+        //        item.DaytimeEnemies.ForEach(enemy => { if (!types.Contains(enemy.enemyType)) types.Add(enemy.enemyType); });
+        //        item.OutsideEnemies.ForEach(enemy => { if (!types.Contains(enemy.enemyType)) types.Add(enemy.enemyType); });
+        //    }
+        //
+        //    return types;
+        //}
 
         private void MenuContent(int windowID)
         {
@@ -217,6 +297,9 @@ namespace ProjectApparatus
                 UI.Checkbox(ref settingsData.b_AntiKick, "AntiKick", "Cannot be kicked from the game.");
                 UI.Checkbox(ref settingsData.b_LandShip, "Land Ship Spam", "Tries to land ship as soon as possible.");
                 UI.Checkbox(ref settingsData.b_CloseShip, "Close Ship Door Spam", "spams ship door shut");
+                UI.Checkbox(ref settingsData.b_OpenShip, "Open Ship Door Spam", "spams ship door open");
+                UI.Checkbox(ref settingsData.b_Chomper, "chomper door", "spams ship door open");
+                UI.Checkbox(ref settingsData.b_AntiRadar, "AntiRadar", "Prevents you from ship spectators.");
                 //UI.Checkbox(ref settingsData.b_RapidFire, "RapidFire", "Prevents you from ship spectators.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
                 //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
@@ -310,6 +393,21 @@ namespace ProjectApparatus
                     RoundManager.Instance.SpawnScrapInLevel();
                 });
 
+                //UI.Button("spawn hoarding bug", "", () =>
+                //{
+                //    SelectableLevel level = StartOfRound.Instance.currentLevel;
+                //    PlayerControllerB player = GameNetworkManager.Instance.localPlayerController;
+                //    var nodes = outside ? RoundManager.Instance.outsideAINodes : RoundManager.Instance.insideAINodes;
+                //    var node = nodes[UnityEngine.Random.Range(0, nodes.Length)];
+                //    RoundManager.Instance.SpawnEnemyGameObject(node.transform.position, 0.0f, -1, type);
+                //});
+
+                UI.Button("more landmines & turrets (host)", "", () =>
+                {
+                    SpawnMapObjects(MapObject.TurretContainer);
+                    SpawnMapObjects(MapObject.Landmine);
+                });
+
                 UI.Button("buying rate (host)", "2", () =>
                 {
                     //float companyBuyingRate = 1f;
@@ -327,6 +425,14 @@ namespace ProjectApparatus
                     //localplayer.playersManager.SetShipDoorsClosed(true);
                 });
 
+                UI.Button("open ship door", "2", () =>
+                {
+                    Helper.CloseShipDoor(false);
+                    //shipDoor = UnityEngine.Object.FindObjectOfType<HangarShipDoor>();
+                    //shipDoor.SetDoorClosed();
+                    //localplayer.playersManager.SetShipDoorsClosed(true);
+                });
+
                 UI.Button("submit leaderboard score hack,", "start challenge moon, land ship, click, start ship and quit.", () =>
                 {
                     int scrapCollected = 2147483647;
@@ -335,7 +441,8 @@ namespace ProjectApparatus
 
                 //UI.Button("hoarder bug steal", "", () =>
                 //{
-                //
+                //    HoarderBugAI bug3 = GameObject.FindObjectOfType<HoarderBugAI>();
+                //    HoarderBugAIExtensions.StealAllItems(bug3, this);
                 //});
 
                 UI.Button("close garage door experimentation", "", () =>
@@ -1050,8 +1157,14 @@ namespace ProjectApparatus
             Settings.Credits.ReadCredits();
         }
 
+        
+
+
+        private bool isCoroutineRunning = false;
         public void Update()
         {
+
+
             if ((PAUtils.GetAsyncKeyState((int)Keys.Insert) & 1) != 0)
             {
                 Settings.Instance.SaveSettings();
@@ -1243,7 +1356,7 @@ namespace ProjectApparatus
                     foreach (ShipAlarmCord shipAlarmCord in shipAlarmCords)
                     {
                         //Debug.Log("ShipAlarmCord found: " + shipAlarmCord.ToString());
-                        shipAlarmCord.StopPullingCordServerRpc(-1);
+                        //shipAlarmCord.StopPullingCordServerRpc(-1);
                         //Debug.Log("ShipAlarmCord found: unpulling PLEASE WORK");
                     }
                 }
@@ -1255,12 +1368,12 @@ namespace ProjectApparatus
                 //PAUtils.SendChatMessage(settingsData.str_ChatMessage);
             }
 
-            if (settingsData.b_MimicNuclear)
-            {
-                HauntedMaskItem hauntedMaskItem = Helper.LocalPlayer?.currentlyHeldObjectServer as HauntedMaskItem;
-                Vector3 mimicSpam = new Vector3(0, 0, 0);
-                hauntedMaskItem.CreateMimicServerRpc(Instance.localPlayer.isInsideFactory, mimicSpam);
-            }
+            //if (settingsData.b_MimicNuclear)
+            //{
+            //    HauntedMaskItem hauntedMaskItem = Helper.LocalPlayer?.currentlyHeldObjectServer as HauntedMaskItem;
+            //    Vector3 mimicSpam = new Vector3(0, 0, 0);
+            //    hauntedMaskItem.CreateMimicServerRpc(Instance.localPlayer.isInsideFactory, mimicSpam);
+            //}
 
             //if (settingsData.b_PlushieSpam)
             //{
@@ -1285,15 +1398,37 @@ namespace ProjectApparatus
             //    }
             //}
 
+
             if (settingsData.b_CloseShip)
             {
                 Helper.CloseShipDoor(true);
+            }
+
+            if (settingsData.b_OpenShip)
+            {
+                Helper.CloseShipDoor(false);
+            }
+
+            if (settingsData.b_Chomper)
+            {
+                StartCoroutine(CloseAndOpenDoorCoroutine());
             }
 
             if (settingsData.b_AnonChatSpam)
                 PAUtils.SendChatMessage(settingsData.str_ChatMessage);
         }
 
+        //// shoutout to openai
+        private IEnumerator CloseAndOpenDoorCoroutine()
+        {
+            isCoroutineRunning = true;
+
+            Helper.CloseShipDoor(true);
+            yield return new WaitForSeconds(1f); // adjust the time as needed
+            Helper.CloseShipDoor(false);
+
+            isCoroutineRunning = false;
+        }
         private Vector2 scrollPos;
     }
 }

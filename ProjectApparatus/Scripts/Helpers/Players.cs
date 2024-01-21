@@ -1,4 +1,6 @@
 #nullable enable
+#pragma warning disable CS8602
+#pragma warning disable CS8600
 using UnityEngine;
 using GameNetcodeStuff;
 
