@@ -205,6 +205,7 @@ namespace ProjectApparatus
             UI.Tab(LocalizationManager.GetString("self"), ref UI.nTab, UI.Tabs.Self);
             UI.Tab(LocalizationManager.GetString("misc"), ref UI.nTab, UI.Tabs.Misc);
             UI.Tab(LocalizationManager.GetString("esp"), ref UI.nTab, UI.Tabs.ESP);
+            UI.Tab("Debug", ref UI.nTab, UI.Tabs.Debug);
             UI.Tab(LocalizationManager.GetString("players"), ref UI.nTab, UI.Tabs.Players);
             UI.Tab(LocalizationManager.GetString("graphics"), ref UI.nTab, UI.Tabs.Graphics);
             UI.Tab(LocalizationManager.GetString("upgrades"), ref UI.nTab, UI.Tabs.Upgrades);
