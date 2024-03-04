@@ -16,6 +16,7 @@ Features courtesy of [realbillie](https://github.com/realbillie):
 - **LC-Hax Commands**
 - and probably some other things i forgot about...
 
+what's a coding style
 
 # Original README
 
