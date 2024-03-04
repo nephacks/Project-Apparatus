@@ -429,6 +429,197 @@ namespace ProjectApparatus
                 settingsData.fl_TurretDistanceLimit = GUILayout.HorizontalSlider(settingsData.fl_TurretDistanceLimit, 50, 500, Array.Empty<GUILayoutOption>());
             });
 
+            UI.TabContents("Debug", UI.Tabs.Debug, () =>
+            {
+                //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
+                UI.Checkbox(ref settingsData.b_Horn, "Ship Horn", ".");
+                UI.Checkbox(ref settingsData.b_Turret, "Berserk Turrets", ".");
+                UI.Checkbox(ref settingsData.b_BetaBadge, "Beta Badge", ".");
+                UI.Checkbox(ref settingsData.b_Invisibility, "Invisibility", "Players will not be able to see you.");
+                UI.Checkbox(ref settingsData.b_AntiKick, "AntiKick", "Cannot be kicked from the game.");
+                UI.Checkbox(ref settingsData.b_LandShip, "Land Ship Spam", "Tries to land ship as soon as possible.");
+                UI.Checkbox(ref settingsData.b_CloseShip, "Close Ship Door Spam", "spams ship door shut");
+                UI.Checkbox(ref settingsData.b_OpenShip, "Open Ship Door Spam", "spams ship door open");
+                UI.Checkbox(ref settingsData.b_Chomper, "chomper door", "spams ship door open");
+                UI.Checkbox(ref settingsData.b_AntiRadar, "AntiRadar", "Prevents you from ship spectators.");
+                //UI.Checkbox(ref settingsData.b_RapidFire, "RapidFire", "Prevents you from ship spectators.");
+                //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
+                //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
+                //UI.Checkbox(ref settingsData.b_AntiKick, "Antikick", "Prevents you from getting kicked.");
+                //UI.Checkbox(ref settingsData.b_InfiniteStam, "Infinite Stamina", "Prevents you from losing any stamina.");
+                //settingsData.i_NightVision = Mathf.RoundToInt(GUILayout.HorizontalSlider(settingsData.i_NightVision, 1, 100));
+
+                // Field to store original rotations
+                Dictionary<PlaceableShipObject, Vector3> originalRotations = new Dictionary<PlaceableShipObject, Vector3>();
+
+                // Inversion button logic
+                UI.Button("upside down ship items", "stellt alles auf kopf", () =>
+                {
+                    foreach (PlaceableShipObject shipObject in GameObjectManager.Instance.shipObjects)
+                    {
+                        NetworkObject networkObject = shipObject.parentObject.GetComponent<NetworkObject>();
+                        if (!originalRotations.ContainsKey(shipObject))
+                        {
+                            originalRotations[shipObject] = shipObject.mainMesh.transform.eulerAngles;
+                        }
+
+                        Vector3 shipPosition = shipObject.transform.position;
+                        Vector3 invertedRotation = new Vector3(90, shipObject.transform.eulerAngles.y, shipObject.transform.eulerAngles.z);
+
+                        shipObject.mainMesh.transform.eulerAngles = invertedRotation;
+                        GameObjectManager.Instance.shipBuildModeManager.PlaceShipObject(shipPosition, invertedRotation, shipObject);
+                        GameObjectManager.Instance.shipBuildModeManager.CancelBuildMode(false);
+                        GameObjectManager.Instance.shipBuildModeManager.PlaceShipObjectServerRpc(shipPosition,
+                            invertedRotation,
+                            networkObject,
+                            -1);
+                    }
+                });
+
+                UI.Button("hide all upgrades", "macht alle upgrades einfach weg", () =>
+                {
+                    foreach (PlaceableShipObject shipObject in GameObjectManager.Instance.shipObjects)
+                    {
+                        // Assuming the name can be accessed via shipObject or one of its components
+                        string shipObjectName = shipObject.mainMesh.name; // or any other relevant property that holds the name
+
+                        // List of object names to keep
+                        List<string> namesToKeep = new List<string> { "Terminal", "StorageCloset", "FileCabinet", "Bunkbeds" };
+
+                        // Check if this shipObject's name is in the list of names to keep
+                        if (namesToKeep.Contains(shipObjectName))
+                        {
+                            // Skip this iteration and do not move this object
+                            Debug.Log(shipObjectName);
+                            continue;
+
+                        }
+
+                        Debug.Log(shipObject);
+
+                        NetworkObject networkObject = shipObject.parentObject.GetComponent<NetworkObject>();
+                        if (StartOfRound.Instance.unlockablesList.unlockables[shipObject.unlockableID].inStorage)
+                            StartOfRound.Instance.ReturnUnlockableFromStorageServerRpc(shipObject.unlockableID);
+
+                        if (!originalRotations.ContainsKey(shipObject))
+                        {
+                            originalRotations[shipObject] = shipObject.mainMesh.transform.eulerAngles;
+                        }
+
+                        Vector3 gonePosition = new Vector3(9223372036854775807, 0, 0);
+
+                        shipObject.mainMesh.transform.eulerAngles = shipObject.mainMesh.transform.eulerAngles;
+                        GameObjectManager.Instance.shipBuildModeManager.PlaceShipObject(gonePosition, shipObject.mainMesh.transform.eulerAngles, shipObject);
+                        GameObjectManager.Instance.shipBuildModeManager.CancelBuildMode(false);
+                        GameObjectManager.Instance.shipBuildModeManager.PlaceShipObjectServerRpc(gonePosition,
+                            shipObject.mainMesh.transform.eulerAngles,
+                            networkObject,
+                            -1);
+                    }
+                });
+
+                UI.Button("0 money", ".", () =>
+                {
+                    if (Instance.shipTerminal)
+                    {
+                        Instance.shipTerminal.groupCredits = 0;
+                        Instance.shipTerminal.SyncGroupCreditsServerRpc(Instance.shipTerminal.groupCredits,
+                            Instance.shipTerminal.numberOfItemsInDropship);
+                    }
+                    //Instance.shipTerminal.groupCredits
+                });
+
+
+                UI.Button("more scrap (host)", "", () =>
+                {
+                    RoundManager.Instance.SpawnScrapInLevel();
+                });
+
+                //UI.Button("spawn hoarding bug", "", () =>
+                //{
+                //    SelectableLevel level = StartOfRound.Instance.currentLevel;
+                //    PlayerControllerB player = GameNetworkManager.Instance.localPlayerController;
+                //    var nodes = outside ? RoundManager.Instance.outsideAINodes : RoundManager.Instance.insideAINodes;
+                //    var node = nodes[UnityEngine.Random.Range(0, nodes.Length)];
+                //    RoundManager.Instance.SpawnEnemyGameObject(node.transform.position, 0.0f, -1, type);
+                //});
+
+                UI.Button("more landmines & turrets (host)", "", () =>
+                {
+                    SpawnMapObjects(MapObject.TurretContainer);
+                    SpawnMapObjects(MapObject.Landmine);
+                });
+
+                UI.Button("buying rate (host)", "2", () =>
+                {
+                    //float companyBuyingRate = 1f;
+                    //companyBuyingRate = buyingRate;
+                    StartOfRound.Instance.companyBuyingRate = 0.0f;
+
+                    StartOfRound.Instance.SyncCompanyBuyingRateServerRpc(); // startofround
+                });
+
+                UI.Button("close ship door", "2", () =>
+                {
+                    Helper.CloseShipDoor(true);
+                    //shipDoor = UnityEngine.Object.FindObjectOfType<HangarShipDoor>();
+                    //shipDoor.SetDoorClosed();
+                    //localplayer.playersManager.SetShipDoorsClosed(true);
+                });
+
+                UI.Button("open ship door", "2", () =>
+                {
+                    Helper.CloseShipDoor(false);
+                    //shipDoor = UnityEngine.Object.FindObjectOfType<HangarShipDoor>();
+                    //shipDoor.SetDoorClosed();
+                    //localplayer.playersManager.SetShipDoorsClosed(true);
+                });
+
+                UI.Button("submit leaderboard score hack,", "start challenge moon, land ship, click, start ship and quit.", () =>
+                {
+                    int scrapCollected = 2147483647;
+                    HUDManager.Instance.GetRankAndSubmitScore(scrapCollected);
+                });
+
+                //UI.Button("hoarder bug steal", "", () =>
+                //{
+                //    HoarderBugAI bug3 = GameObject.FindObjectOfType<HoarderBugAI>();
+                //    HoarderBugAIExtensions.StealAllItems(bug3, this);
+                //});
+
+                UI.Button("close garage door experimentation", "", () =>
+                {
+                    var interactTriggers = GameObject.FindObjectsOfType<InteractTrigger>();
+
+                    foreach (var interactTrigger in interactTriggers)
+                    {
+                        // Check if the interactTrigger is valid and its name is "Cube" and its parent's name is "Cutscenes"
+                        if (interactTrigger != null && interactTrigger.name == "Cube" && interactTrigger.transform.parent.name == "Cutscenes")
+                        {
+                            interactTrigger.randomChancePercentage = 100;
+                            interactTrigger.Interact(Instance.localPlayer.transform);
+                        }
+                    }
+
+                });
+
+
+                settingsData.str_FakeDisconnect = GUILayout.TextField(settingsData.str_FakeDisconnect, Array.Empty<GUILayoutOption>());
+                UI.Button("Send fake disconnect message", "Anonymously sends a message in chat.", () =>
+                {
+                    PAUtils.SendChatMessage(settingsData.str_FakeDisconnect + " disconnected.");
+                });
+
+
+
+            });
+
+            UI.TabContents("NUCLEAR", UI.Tabs.Nuclear, () =>
+            {
+                UI.Checkbox(ref settingsData.b_NUCLEAR, "tumble dry", "tumble dry");
+                //UI.Checkbox(ref settingsData.b_MimicNuclear, "mimic spam", "tumble dry");
+            });
+
             UI.TabContents(null, UI.Tabs.Players, () =>
             {
                 GUILayout.BeginHorizontal();
